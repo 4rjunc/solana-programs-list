@@ -143,6 +143,16 @@ describe("Vault Manager 💰 🕴️", () => {
 
       const tokenAccountInfo = await getAccount(connection, ataAlice.address);
 
+      const initialUserBalance = await provider.connection.getBalance(
+        ataAlice.address
+      );
+      console.log(
+        "----------------------------------------------------------------"
+      );
+      console.log("Account Balance:", initialUserBalance);
+      console.log(
+        "----------------------------------------------------------------"
+      );
       const balanceToken =
         tokenAccountInfo.amount / BigInt(Math.pow(10, decimals));
       console.log(
