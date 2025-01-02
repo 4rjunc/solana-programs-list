@@ -1,3 +1,7 @@
+<div align="center">
+ <img src="./banner.png" alt="solana" width="250">
+</div>
+
 # Solana Programs Collection
 
 ## Overview
