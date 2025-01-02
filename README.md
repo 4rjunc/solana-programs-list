@@ -1,12 +1,10 @@
 <div align="center">
- <img src="./banner.png" alt="solana" width="250">
+ <img src="./banner.png" alt="solana" width="350">
+
+ <h2> Solana Programs Collection </h2>
 </div>
 
-# Solana Programs Collection
-
-## Overview
-
-This repository is a curated collection of Solana programs demonstrating various use cases, blockchain interactions, and innovative blockchain solutions built on the Solana blockchain.
+A curated collection of Solana programs built with Rust
 
 ## Repository Structure
 
@@ -14,13 +12,16 @@ Each program is organized in its own dedicated folder with a clear naming conven
 
 - For Anchor framework programs: `anchor-[programname]`
 - For native Solana programs: `native-[programname]`
+- For general notation of framework programs: `[framework]-[programname]`
 
 ## Programs Included
 
-- [List your current or planned Solana programs here]
-- Example: Decentralized Counter App
-- Example: Token Vesting Program
-- Example: Escrow Contract
+| Program                                                                                     | Description                     | Features                                      | Framework                              | Status         | Tests |
+| ------------------------------------------------------------------------------------------- | ------------------------------- | --------------------------------------------- | -------------------------------------- | -------------- | ----- |
+| [Counterapp](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-counterapp)    | Simplecounter app               | `PDA`                                         | [Anchor](https://www.anchor-lang.com/) | 🟢 Completed   | ✅    |
+| [NFT Minting](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-nft-metaplex) | Create & manage NFT collections | `Metadata` `Metaplex` `Mint` `Transfer` `CPI` | [Anchor](https://www.anchor-lang.com/) | 🟡 In Progress | ❌    |
+| [Sol Valut](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-sol-vault)      | Deposit and withdraw Sol        | `Deposit` `Withdraw` `PDA`                    | [Anchor](https://www.anchor-lang.com/) | 🟢 Completed   | ✅    |
+| Escrow                                                                                      | Secure token swaps              | `Lock` `Release` `Cancel`                     | [Anchor](https://www.anchor-lang.com/) | 🔴 Planned     | ❌    |
 
 ## Prerequisites
 
@@ -40,7 +41,7 @@ cd solana-programs-list
 
 2. Set up your Solana environment
 3. Navigate to individual program directories
-4. Follow specific program README instructions
+4. Follow specific program `README.md` instructions
 
 ## Building Programs
 

@@ -32,6 +32,8 @@ We appreciate your interest in contributing to our Solana programs repository. T
   - `[frameworkname]-counterapp`
   - `steel-counterapp` or `poseidon-counterapp`
 
+4. No need to update the table in `README.md`.
+
 ### Code Quality
 
 - Include comprehensive README in each program directory
