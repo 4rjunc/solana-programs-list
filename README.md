@@ -1,7 +1,7 @@
 <div align="center">
  <img src="./banner.png" alt="solana" width="380">
 
- <h2> Solana Programs Collection </h2>
+ <h2> Solana Programs Collection! </h2>
 </div>
 
 A curated collection of Solana programs built with Rust
