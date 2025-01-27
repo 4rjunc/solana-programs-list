@@ -23,6 +23,7 @@ Each program is organized in its own dedicated folder with a clear naming conven
 | [Sol Valut](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-sol-vault)      | Deposit and withdraw Sol         | `Deposit` `Withdraw` `PDA`                    | [Anchor](https://www.anchor-lang.com/) | 🟢 Completed   | ✅    |
 | [PDA Demo](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-pda)             | Simple program to demostrate PDA | `PDA`                                         | [Anchor](https://www.anchor-lang.com/) | 🟢 Completed   | ✅    |
 | Escrow                                                                                      | Secure token swaps               | `Lock` `Release` `Cancel`                     | [Anchor](https://www.anchor-lang.com/) | 🔴 Planned     | ❌    |
+| [Solana Error](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-solanaerror)             | Playing with errors of Solana| `PDA` `Debugging`                                         | [Anchor](https://www.anchor-lang.com/) | 🟡 In Progress   | ❌    |
 
 ## Prerequisites
 
