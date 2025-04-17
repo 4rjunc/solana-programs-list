@@ -1,12 +1,15 @@
-use pinocchio::{account_info::AccountInfo, entrypoint, msg, pubkey::Pubkey, ProgramResult};
+#![no_std]
 
-entrypoint!(process_instruction);
+#[cfg(not(feature = "no-entrypoint"))]
+mod entrypoint;
 
-pub fn process_instruction(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
-    instruction_data: &[u8],
-) -> ProgramResult {
-    msg!("Hello from my program!");
-    Ok(())
-}
+#[cfg(feature = "std")]
+extern crate std;
+
+pub mod errors;
+pub mod instructions;
+pub mod states;
+
+// build the program once while setting up pinocchio project and replace this address with the keypair's address in
+// target/ folder
+pinocchio_pubkey::declare_id!("5sZhoPJzVbvfik76odGeYmPLZy3veQJEPk8FnnhkeeUc");
