@@ -1,3 +1,6 @@
 [submodule "anchor-dual-signing"]
 	path = anchor-dual-signing
 	url = https://github.com/4rjunc/solana-dual-signing
+[submodule "pinocchio-vault"]
+	path = pinocchio-vault
+	url = https://github.com/4rjunc/pinocchio-vault
