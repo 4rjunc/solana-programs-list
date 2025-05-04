@@ -16,6 +16,10 @@ Each program is organized in its own dedicated folder with a clear naming conven
 
 ## Programs Included
 
+🟢 Completed  
+🟡 In Progress
+🔴 Planned
+
 | Program                                                                                     | Description                      | Features                                      | Framework                              | Status         | Tests |
 | ------------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- | -------------------------------------- | -------------- | ----- |
 | [Counterapp](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-counterapp)    | Simplecounter app                | `PDA`                                         | [Anchor](https://www.anchor-lang.com/) | 🟢 Completed   | ✅    |
@@ -55,7 +59,7 @@ anchor build
 For native Solana programs:
 
 ```bash
-cargo build
+cargo build-sbf
 ```
 
 ## Testing
