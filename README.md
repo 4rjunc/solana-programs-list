@@ -16,11 +16,15 @@ Each program is organized in its own dedicated folder with a clear naming conven
 
 ## Programs Included
 
-- 🟢 Completed  
+**Legend:**
+
+- 🟢 Completed
 - 🟡 In Progress
 - 🔴 Planned
+- ✅ Tests Available
+- ❌ No Tests
 
-| Program                                                                                     | Description                      | Features                                      | Framework                              | Status         | Tests |
+| Program                                                                                     | Description                      | Features                                      | Anchor                              | Status         | Tests |
 | ------------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- | -------------------------------------- | -------------- | ----- |
 | [Counterapp](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-counterapp)    | Simplecounter app                | `PDA`                                         | [Anchor](https://www.anchor-lang.com/) | 🟢    | ✅    |
 | [NFT Minting](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-nft-metaplex) | Create & manage NFT collections  | `Metadata` `Metaplex` `Mint` `Transfer` `CPI` | [Anchor](https://www.anchor-lang.com/) | 🟡    | ❌    |
