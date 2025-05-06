@@ -40,5 +40,7 @@ fn process_instruction(
     let token_program = next_account_info(account_iter)?;
     let token_metadata_program = next_account_info(account_iter)?;
 
+    // Create an account for the mint
+
     Ok(())
 }
