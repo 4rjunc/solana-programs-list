@@ -24,8 +24,8 @@ Each program is organized in its own dedicated folder with a clear naming conven
 - ✅ Tests Available
 - ❌ No Tests
 
-| Program                                                                                     | Description                      | Features                                      | Anchor Impl.                           |Nativ Impl.       | Pinocchio Impl. |
-| ------------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- | -------------------------------------- | -------------- | ----- |
+| Program                                                                                     | Description                      | Features                                      | ⚓ Anchor Impl.                           | 🦀 Nativ Impl.       |🤥Pinocchio Impl. |
+| ------------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- | --------------------------------------   | -------------------------------------- | -------------------------------------- |
 | [Counterapp](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-counterapp)    | Simplecounter app                | `PDA`                                         | [⚓](https://www.anchor-lang.com/)     | 🟢    | ✅    |
 | [NFT Minting](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-nft-metaplex) | Create & manage NFT collections  | `Metadata` `Metaplex` `Mint` `Transfer` `CPI` | [⚓](https://www.anchor-lang.com/)     | 🟡    | ❌    |
 | [Sol Valut](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-sol-vault)      | Deposit and withdraw Sol         | `Deposit` `Withdraw` `PDA`                    | [⚓](https://www.anchor-lang.com/)     | 🟢    | ✅    |
