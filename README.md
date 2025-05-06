@@ -24,13 +24,12 @@ Each program is organized in its own dedicated folder with a clear naming conven
 - ✅ Tests Available
 - ❌ No Tests
 
-| Program                                                                                     | Description                      | Features                                      | ⚓ Anchor Impl.                           | 🦀 Nativ Impl.       |🤥Pinocchio Impl. |
-| ------------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------- | --------------------------------------   | -------------------------------------- | -------------------------------------- |
-| [Counterapp](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-counterapp)    | Simplecounter app                | `PDA`                                         | [⚓](https://www.anchor-lang.com/)     | 🟢    | ✅    |
-| [NFT Minting](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-nft-metaplex) | Create & manage NFT collections  | `Metadata` `Metaplex` `Mint` `Transfer` `CPI` | [⚓](https://www.anchor-lang.com/)     | 🟡    | ❌    |
-| [Sol Valut](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-sol-vault)      | Deposit and withdraw Sol         | `Deposit` `Withdraw` `PDA`                    | [⚓](https://www.anchor-lang.com/)     | 🟢    | ✅    |
-| [PDA Demo](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-pda)             | Simple program to demostrate PDA | `PDA`                                         | [⚓](https://www.anchor-lang.com/)     | 🟢    | ✅    |
-| [Escrow](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-escrow)            | Secure token swaps               | `Lock` `Release` `Cancel`                     | [⚓](https://www.anchor-lang.com/)     | 🔴      | ❌    |
+| Program                                                                                     | Description                      | Features                                      | ⚓ Anchor Impl.                           | 🦀 Native Impl.       |🤥Pinocchio Impl. |
+| Counterapp  | Simplecounter app                | `PDA`                                         | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-counterapp) 🟢 ✅      | 🟢    | ✅    |
+| NFT Minting | Create & manage NFT collections  | `Metadata` `Metaplex` `Mint` `Transfer` `CPI` | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-nft-metaplex) 🟡 ❌      | 🟡    | ❌    |
+| Sol Valut   | Deposit and withdraw Sol         | `Deposit` `Withdraw` `PDA`                    | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-sol-vault) 🟢 ✅      | 🟢    | ✅    |
+| PDA Demo    | Simple program to demostrate PDA | `PDA`                                         | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-pda) 🟢 ✅     | 🟢    | ✅    |
+| Escrow      | Secure token swaps               | `Lock` `Release` `Cancel`                     | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-escrow) 🔴 ❌      | 🔴      | ❌    |
 
 ## Prerequisites
 
