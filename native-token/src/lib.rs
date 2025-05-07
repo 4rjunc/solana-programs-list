@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use mpl_token_metadata::instructions as mpl_instruction;
+use mpl_token_metadata::instruction as mpl_instruction;
 use solana_program::entrypoint;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -19,7 +19,7 @@ pub struct TokenArgs {
     pub title: String,
     pub symbol: String,
     pub uri: String,
-    pub decimal: String,
+    pub decimal: u8,
 }
 
 entrypoint!(process_instruction);
@@ -43,7 +43,7 @@ fn process_instruction(
     let token_metadata_program = next_account_info(account_iter)?;
 
     // Create an account for the mint
-    msg!("Creating,  Mint Account");
+    msg!("Creating, Mint Account");
     msg!("MINT: {}", mint_account.key);
     invoke(
         &system_instruction::create_account(
