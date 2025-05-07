@@ -25,3 +25,6 @@ The token account holds information about the tokens owned by a pubkey. Ownershi
 ### Resources 
 [Solana Doc 1](https://solana.com/pt/developers/courses/tokens-and-nfts/token-program)
 [Solana Doc 2](https://spl.solana.com/token)
+
+## Erros I faced
+[No Entrypoint](https://solana.stackexchange.com/questions/14899/getting-build-error-the-global-allocator-in-spl-token-conflicts-with-globa)
