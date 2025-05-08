@@ -29,6 +29,7 @@ pub fn process_instruction(
     // split_at(1) splits it at the first byte
     // instruction_discriminant gets the first byte (position 0), which works as an instruction ID/type
     // instruction_data_inner gets all remaining bytes (position 1 onward), which contain instruction-specific parameters
+
     let (instruction_discriminant, instruction_data_inner) = instruction_data.split_at(1);
     match instruction_discriminant[0] {
         0 => {
@@ -56,6 +57,15 @@ pub fn process_increment_counter(
 
     let mut counter = Counter::try_from_slice(&counter_account.try_borrow_mut_data()?)?;
     counter.count += 1;
+
+    // Converts your counter struct into bytes and writes them to the account storage.
+    // counter_account.data is a RefCell containing the account's raw data
+    // .borrow_mut() gets a mutable reference to that data
+    // * dereferences it to get the raw data slice
+    // &mut * creates a mutable reference to that slice
+    // .serialize() writes the counter's bytes into that storage location
+    // The trailing ? propagates any errors that might occur during serialization
+
     counter.serialize(&mut *counter_account.data.borrow_mut())?;
 
     msg!("Incremented to {:?}", counter.count);
