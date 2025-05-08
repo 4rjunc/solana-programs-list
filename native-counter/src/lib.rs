@@ -24,6 +24,11 @@ pub fn process_instruction(
     accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {
+    // The split_at() method divides a slice at a specified index, returning two separate slices.
+    // instruction_data is the raw byte array passed to your program
+    // split_at(1) splits it at the first byte
+    // instruction_discriminant gets the first byte (position 0), which works as an instruction ID/type
+    // instruction_data_inner gets all remaining bytes (position 1 onward), which contain instruction-specific parameters
     let (instruction_discriminant, instruction_data_inner) = instruction_data.split_at(1);
     match instruction_discriminant[0] {
         0 => {
