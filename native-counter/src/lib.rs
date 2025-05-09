@@ -36,6 +36,10 @@ pub fn process_instruction(
             msg!("Increment");
             process_increment_counter(accounts, instruction_data_inner)?;
         }
+        1 => {
+            msg!("Decrement");
+            process_decrement_counter(accounts, instruction_data_inner)?;
+        }
         _ => {
             msg!("Error: unknown instruction");
         }
@@ -57,6 +61,36 @@ pub fn process_increment_counter(
 
     let mut counter = Counter::try_from_slice(&counter_account.try_borrow_mut_data()?)?;
     counter.count += 1;
+
+    // Converts your counter struct into bytes and writes them to the account storage.
+    // counter_account.data is a RefCell containing the account's raw data
+    // .borrow_mut() gets a mutable reference to that data
+    // * dereferences it to get the raw data slice
+    // &mut * creates a mutable reference to that slice
+    // .serialize() writes the counter's bytes into that storage location
+    // The trailing ? propagates any errors that might occur during serialization
+
+    counter.serialize(&mut *counter_account.data.borrow_mut())?;
+
+    msg!("Incremented to {:?}", counter.count);
+
+    Ok(())
+}
+
+pub fn process_decrement_counter(
+    accounts: &[AccountInfo],
+    _instruction_data: &[u8],
+) -> Result<(), ProgramError> {
+    let account_info_iter = &mut accounts.iter();
+
+    let counter_account = next_account_info(account_info_iter)?;
+    assert!(
+        counter_account.is_writable,
+        "Counter account must be writable"
+    );
+
+    let mut counter = Counter::try_from_slice(&counter_account.try_borrow_mut_data()?)?;
+    counter.count -= 1;
 
     // Converts your counter struct into bytes and writes them to the account storage.
     // counter_account.data is a RefCell containing the account's raw data
