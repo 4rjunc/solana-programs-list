@@ -1,5 +1,7 @@
 ## ESCROW
 
+![image](https://media1.tenor.com/m/iDtbJ7PJOL8AAAAC/game-strange-gs.gif)
+
     A["Alice with Asset A"] -->|"1. Sends Asset A"| C["Escrow C"]
     B["Bob with Asset B"] -->|"2. Sends Asset B"| C
     C -->|"3. Verifies both assets received"| C
