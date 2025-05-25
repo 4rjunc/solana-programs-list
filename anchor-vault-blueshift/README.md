@@ -1,8 +1,7 @@
-
-
 Notes: 
 
 1. What is `signer_seeds`?
+
 `signer_seeds` is the **seed array used to derive and authorize the PDA (Program Derived Address)**. It's NOT the signer's key - it's the recipe to recreate the vault's address and prove ownership.
 
 ```rust
@@ -12,6 +11,7 @@ let signer_seeds = &[b"vault", bindings.as_ref(), &[ctx.bumps.vault]];
 ```
 
 2. Can anyone with these seeds drive the PDA?
+
 No, absolutely not! Here's why:
 - The bindings.as_ref() is the signer's public key from the current transaction
 - Only someone who can sign the transaction (has the private key) can execute this
@@ -28,23 +28,24 @@ pub signer: Signer<'info>,  // <-- This validates the signature!
 
 `signer_seeds` serves two purposes:
 
-    - A) PDA Derivation: Recreates the vault address
+   - A) PDA Derivation: Recreates the vault address
 
-    ```rust
-    // Anchor internally does: 
-    // Pubkey::find_program_address(&[b"vault", signer_key], program_id)
-    ```
+        ```rust
+        // Anchor internally does: 
+        // Pubkey::find_program_address(&[b"vault", signer_key], program_id)
+        ```
 
-    - B) CPI Authorization: Allows the PDA to "sign" on behalf of itself
-    ```rust
-    CpiContext::new_with_signer(
-        // ...
-        &[&signer_seeds[..]], // <-- This lets the PDA authorize the transfer
-    )
-    ```
+   - B) CPI Authorization: Allows the PDA to "sign" on behalf of itself
+        ```rust
+        CpiContext::new_with_signer(
+            // ...
+            &[&signer_seeds[..]], // <-- This lets the PDA authorize the transfer
+        )
+        ```
 The PDA can only be controlled by the program that created it, and only when the correct seeds are provided.
 
 4. The `0` in `minimum_balance(0)`
+
 ```
 Rent::get()?.minimum_balance(0)
 //                           ^
