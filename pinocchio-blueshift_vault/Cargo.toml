@@ -1,0 +1,11 @@
+[package]
+name = "pinocchio-blueshift_vault"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pinocchio = "0.8.4"
+pinocchio-system = "0.2.3"
+
+[lib]
+crate-type = ["lib", "cdylib"]
