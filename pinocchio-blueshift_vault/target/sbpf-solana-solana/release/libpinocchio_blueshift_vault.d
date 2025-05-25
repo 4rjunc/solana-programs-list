@@ -1,0 +1,1 @@
+/Users/arjunc/Documents/solana/solana-programs-list/pinocchio-blueshift_vault/target/sbpf-solana-solana/release/libpinocchio_blueshift_vault.rlib: /Users/arjunc/Documents/solana/solana-programs-list/pinocchio-blueshift_vault/src/lib.rs
