@@ -1,4 +1,10 @@
-Notes: 
+# Anchor Vault 
+
+<p align="center">
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODM2eW93emg1aGk4Z29iNHFnZnhpd3Q4Z2VhNzNuZ282eGM4a3RpaSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/8Xg7lrwftwTzWbjhmr/giphy.gif" alt="vault" width="200" />
+</p>
+
+## Notes 
 
 1. What is `signer_seeds`?
 
@@ -44,7 +50,7 @@ pub signer: Signer<'info>,  // <-- This validates the signature!
         ```
 The PDA can only be controlled by the program that created it, and only when the correct seeds are provided.
 
-4. The `0` in `minimum_balance(0)`
+4. The `0` in `minimum_balance(0)` ?
 
 ```
 Rent::get()?.minimum_balance(0)
