@@ -6,4 +6,4 @@ pub mod instructions;
 pub mod processor;
 pub mod states;
 
-entrypoint!(process_intruction);
+entrypoint!(process_instruction);

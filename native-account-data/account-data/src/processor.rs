@@ -4,17 +4,16 @@ use solana_program::{
     pubkey::Pubkey,
 };
 
-use crate::instructions;
+use crate::instructions::create;
 use crate::states::Student;
 
 pub fn process_instruction(
-    erogram_id: &Pubkey,
+    program_id: &Pubkey,
     accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {
     if let Ok(student_data) = Student::try_from_slice(instruction_data) {
-        return instructions::create::create_student_info(program_id, accounts, student_data);
+        return create::create_student_info(program_id, accounts, student_data);
     }
-
     Ok(())
 }
