@@ -1,3 +1,3 @@
-pub use student_data;
+pub mod student_data;
 
-pub mod student_data::*;
+pub use student_data::*;
