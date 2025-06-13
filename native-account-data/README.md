@@ -35,3 +35,75 @@ change serilize and deseralize to bytemuck
 - The outer `&mut` is needed because serialize() expects a mutable reference to something that implements Write
 - The slice `&mut [u8]` implements the `Write` trait, allowing borsh to write serialized bytes directly into it
 
+## Here are the key components of a Solana TransactionInstruction:
+
+1. Keys Array (Accounts)
+
+```javascript
+keys: [
+  {
+    pubkey: student.publicKey,  // account that will store the data
+    isSigner: true,                        // needs to sign the transaction
+    isWritable: true,                      // data will be written to this account
+  },
+  { 
+    pubkey: payer.publicKey,               // account paying for transaction fees
+    isSigner: true,                        // must sign (authorizes payment)
+    isWritable: true,                      // lamports will be deducted
+  },
+  { 
+    pubkey: SystemProgram.programId,       // solana's built-in system program
+    isSigner: false,                       // programs don't sign
+    isWritable: false,                     // program code isn't modified
+  },
+],```
+
+### Account roles:
+
+- Data account: Where your information gets stored
+- Payer account: Pays transaction fees and rent
+- System program: Handles account creation/management
+
+2. Program ID
+
+```javascript
+programId: PROGRAM_ID,  // your custom program's address
+```
+
+- Tells Solana which program should process this instruction
+
+3. Instruction Data
+
+```javascript
+data: new Student({
+  name: 'arjun',
+  reg_number: 136,
+  sub: 'computer',
+}).toBuffer(),
+```
+
+- Serialized data that gets passed to your program
+- Your Rust program deserializes this to understand what to do
+- Contains the actual information to store/process
+
+Complete instruction flow:
+
+1. Solana runtime receives the instruction
+2. Loads the specified accounts (addressInfoAccount, payer, SystemProgram)
+3. Calls your program (PROGRAM_ID) 
+4. Passes the accounts + data to your Rust program's entrypoint
+5. Your program processes the data and modifies account state
+6. Transaction completes
+
+In your Rust program, you receive:
+```rust
+pub fn process_instruction(
+    program_id: &Pubkey,           // PROGRAM_ID
+    accounts: &[AccountInfo],      // [addressInfoAccount, payer, SystemProgram]
+    instruction_data: &[u8],       // serialized AddressInfo data
+) -> ProgramResult {
+    // Your program logic here
+}
+```
+
+Think of it as: A complete "message" telling Solana exactly what to do, which accounts to use, which program to run, and what data to process.
