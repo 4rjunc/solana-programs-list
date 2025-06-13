@@ -1,0 +1,16 @@
+{
+  "name": "native-account-data",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts":{
+    "test": "bun run tests/account-data.ts",
+    "build": "cargo build-sbf --manifest-path=./account-data/Cargo.toml --sbf-out-dir=./account-data/target/so"
+  }
+}
