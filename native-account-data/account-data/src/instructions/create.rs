@@ -40,7 +40,7 @@ pub fn create_student_info(
             student_info_account.key, // the new account's public key
             lamports_required,        // how many lamports to deposit
             account_span as u64,      // how much storage space to allocate
-            program_id,               // which program will own this account
+            &crate::ID,               // which program will own this account
         ),
         &[
             payer.clone(),
