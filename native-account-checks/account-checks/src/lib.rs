@@ -39,9 +39,9 @@ pub fn process_instruction(
     }
 
     // Account not initiazlized
-    if account_to_create.lamports() == 0 {
-        return Err(ProgramError::UninitializedAccount);
-    }
+    //if account_to_create.lamports() == 0 {
+    //    return Err(ProgramError::UninitializedAccount);
+    //}
 
     // this must be owned by this program to change
     if account_to_change.owner != program_id {
