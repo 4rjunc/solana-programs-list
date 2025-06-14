@@ -8,4 +8,6 @@ pub mod states;
 
 entrypoint!(process_instruction);
 
-const ID: Pubkey = pubkey!("4C2Au9iMf6fgZEvz9EjZBvete8myXjA814XiYYRoGewj");
+//const ID: Pubkey = pubkey!("DZqZpnJzMRLi31CRkGqFpQPHgMJnBHY7A9PbvAiLmuEv");
+
+solana_program::declare_id!("DZqZpnJzMRLi31CRkGqFpQPHgMJnBHY7A9PbvAiLmuEv");

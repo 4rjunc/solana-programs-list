@@ -61,7 +61,7 @@ const StudentSchema = new Map([
 
 // Configuration
 const DEVNET_URL = 'https://api.devnet.solana.com';
-const PROGRAM_ID = new PublicKey("4C2Au9iMf6fgZEvz9EjZBvete8myXjA814XiYYRoGewj");
+const PROGRAM_ID = new PublicKey("DZqZpnJzMRLi31CRkGqFpQPHgMJnBHY7A9PbvAiLmuEv");
 
 // Helper function to load or create keypair
 function loadOrCreateKeypair(filename: string): Keypair {
