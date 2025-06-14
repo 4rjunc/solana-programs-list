@@ -2,6 +2,10 @@ Saving an address with name, house number, street and city in an account.
 
 change serilize and deseralize to bytemuck
 
+## what
+
+This program store data into newlt created account's data field 
+[Accounts struct](https://docs.rs/solana-program/1.5.0/solana_program/account_info/struct.AccountInfo.html#fields)
 
 ## Deep dive into the serialization line:
 ```student_info.serialize(&mut &mut student_info_account.data.borrow_mut()[..])?;```

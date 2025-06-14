@@ -19,7 +19,7 @@
     "test": "bun test tests/account-data.test.ts --timeout 1000000",
     "test:watch": "bun test tests/account-data.test.ts --watch",
     "build": "cargo build-sbf --manifest-path=./account-data/Cargo.toml --sbf-out-dir=./account-data/target/so",
-    "build-and-test": "bun run build && bun run test",
+    "build-and-test": "cargo build-sbf --manifest-path=./account-data/Cargo.toml --sbf-out-dir=./tests/fixtures && bun run test",
     "deploy": "solana program deploy ./account-data/target/so/account_data.so"
   }
 }
