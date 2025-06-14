@@ -16,17 +16,17 @@
 
 ## Introduction
 
-This comprehensive guide walks through a complete Solana native program that demonstrates fundamental blockchain development concepts. The program creates and manages student records on the Solana blockchain, showcasing essential patterns like account creation, data serialization, and cross-program invocations.
+This deep guide walks through a complete Solana native program. The program creates student records on the Solana, With concepts like account creation, data serialization, and cross-program invocations.
 
 **What This Program Does:**
-- Creates new accounts on the Solana blockchain
+- Creates new accounts on the Solana.
 - Stores student information (name, registration number, subject) in account data
-- Demonstrates proper account management and rent-exemption
+- Demonstrates account management and rent-exemption
 - Shows how to interact with Solana's System Program through CPI calls
 
 ## Understanding Solana Accounts
 
-Before diving into the code, it's crucial to understand Solana's account model. Unlike Ethereum's contract-centric approach, Solana uses an account-based model where:
+Its important to understand Solana's account model. Unlike Ethereum's contract-centric approach, Solana uses an account-based model where:
 
 **Every piece of data lives in an account**, and accounts have:
 - **Public Key**: Unique identifier (like an address)
@@ -39,7 +39,7 @@ Before diving into the code, it's crucial to understand Solana's account model. 
 
 ## Program Architecture Overview
 
-Our program follows Solana's standard architecture pattern:
+Project's file structure 
 
 ```
 src/
@@ -52,8 +52,6 @@ src/
     ├── mod.rs
     └── student_data.rs # Student struct definition
 ```
-
-This modular approach separates concerns and makes the code maintainable and testable.
 
 ## Core Components Deep Dive
 
@@ -71,10 +69,9 @@ entrypoint!(process_instruction);
 solana_program::declare_id!("DZqZpnJzMRLi31CRkGqFpQPHgMJnBHY7A9PbvAiLmuEv");
 ```
 
-**Breaking it down:**
 - `entrypoint!(process_instruction)`: Tells Solana which function to call when someone interacts with your program
 - `declare_id!()`: Creates a constant `ID` with your program's on-chain address
-- The program ID is generated during deployment and must match what's on-chain
+- The program ID is generated during building the project, It needs to be replaced when you build it. Build it again and deploy.
 
 ### 2. Instruction Processor (processor.rs)
 
@@ -97,10 +94,8 @@ pub fn process_instruction(
 }
 ```
 
-**Key Points:**
-- **Security Check**: Always verify the program_id matches your program's ID
-- **Instruction Routing**: This program only handles one instruction type (creating student records)
-- **Error Handling**: Uses Solana's `ProgramResult` type for proper error propagation
+- Always verify the program_id matches your program's ID
+- This program only handles one instruction type (creating student records)
 
 ## The Student Data Structure
 
@@ -119,16 +114,8 @@ pub struct Student {
 - **Deterministic**: Same data always produces identical bytes
 - **Efficient**: Compact binary format saves on-chain storage costs
 - **Cross-Language**: Works seamlessly between Rust (on-chain) and JavaScript (client)
-- **Version Safe**: Schema evolution support for upgrades
-
-**Storage Considerations:**
-- `String` fields are variable-length, affecting account size calculations
-- `u8` for reg_number limits values to 0-255 (consider `u32` for real applications)
-- Each field adds to the total account size needed
 
 ## Processing Instructions
-
-The heart of our program lies in the account creation logic:
 
 ### Account Creation Flow
 
@@ -178,7 +165,7 @@ let system_program = next_account_info(account_iter)?;
 ```
 - Creates an iterator to safely traverse the accounts array
 - `next_account_info()` extracts accounts in order and handles bounds checking
-- Order matters! Must match the order provided by the client
+- Order matters. Must match the order provided by the client
 
 **Step 2: Storage Calculation**
 ```rust
@@ -191,7 +178,7 @@ let lamports_required = (Rent::get()?).minimum_balance(account_span);
 
 ## Understanding CPI (Cross-Program Invocation)
 
-The most critical part of this program is the CPI call to Solana's System Program:
+The part of this program where CPI call to Solana's System Program:
 
 ```rust
 invoke(
@@ -212,15 +199,10 @@ invoke(
 
 **What's Happening Here:**
 
-1. **CPI Mechanics**: Your program calls another program (System Program) to perform an operation
-2. **Account Creation**: The System Program creates a new account with specified parameters
-3. **Ownership Transfer**: The new account is immediately owned by your program (`&crate::ID`)
-4. **Security**: All required accounts must be provided and properly signed
-
-**Why CPI Instead of Direct Creation?**
-- Only the System Program can create new accounts
-- This enforces Solana's security model
-- Ensures proper lamport accounting and rent calculations
+1. Your program calls another program (System Program) to perform an operation
+2. The System Program creates a new account with specified parameters
+3. The new account is immediately owned by your program (`&crate::ID`)
+4. All required accounts must be provided and properly signed
 
 **Account Roles in CPI:**
 - **Payer**: Must be signer, will be debited lamports
@@ -257,11 +239,6 @@ student_info.serialize(&mut &mut student_info_account.data.borrow_mut()[..])?;
    - Inner `&mut`: Creates mutable reference to the slice
    - Outer `&mut`: Required because `serialize()` expects `&mut impl Write`
    - The slice `&mut [u8]` implements the `Write` trait
-
-**Why This Approach?**
-- Direct memory writing is extremely efficient
-- No intermediate allocations or copies
-- Borsh writes directly into the account's storage space
 
 ## Client-Side Implementation
 
@@ -329,11 +306,6 @@ const StudentSchema = new Map([
 ]);
 ```
 
-**Critical Points:**
-- Schema must exactly match the Rust struct
-- Field order must be identical
-- Type mappings must be correct (`u8` in Rust = `'u8'` in Borsh schema)
-
 ## Testing the Program
 
 The test suite demonstrates the complete lifecycle:
@@ -348,10 +320,8 @@ test('Creating account for student data', async () => {
 });
 ```
 
-**Key Points:**
 - Both payer and student must sign (required by our instruction)
 - Recent blockhash prevents replay attacks
-- Transaction processing happens atomically
 
 ### 2. Data Retrieval Test
 ```javascript
@@ -365,83 +335,19 @@ test('Read student data', async () => {
 });
 ```
 
-**Verification Process:**
-- Fetch the account data from the blockchain
 - Deserialize the raw bytes back into a Student struct
-- Verify all fields match the original data
-
-## Common Pitfalls and Best Practices
-
-### 1. Account Size Calculations
-**Problem**: Underestimating storage requirements causes failures.
-**Solution**: Always serialize data first to get exact size:
-```rust
-let account_span = (to_vec(&student_info)?).len();
-```
-
-### 2. Account Order Dependency
-**Problem**: Accounts must be provided in the exact order your program expects.
-**Solution**: Document the expected account order clearly:
-```rust
-// Expected accounts:
-// 0. Student info account (writable, signer)
-// 1. Payer account (writable, signer)
-// 2. System program (readable)
-```
-
-### 3. Rent Exemption
-**Problem**: Accounts without sufficient lamports get deleted.
-**Solution**: Always calculate and deposit minimum rent:
-```rust
-let lamports_required = (Rent::get()?).minimum_balance(account_span);
-```
-
-### 4. Program ID Verification
-**Problem**: Malicious programs could call your functions.
-**Solution**: Always verify the program ID:
-```rust
-if program_id.ne(&crate::ID) {
-    return Err(ProgramError::IncorrectProgramId);
-}
-```
-
-### 5. Schema Compatibility
-**Problem**: Client and program schemas must match exactly.
-**Solution**: Use code generation or shared schema definitions.
-
-## Advanced Concepts and Extensions
-
-### Security Considerations
-- **Access Control**: Add owner checks before allowing data modifications
-- **Input Validation**: Validate string lengths and numeric ranges
-- **Signer Verification**: Ensure only authorized parties can create accounts
-
-### Performance Optimizations
-- **Batch Operations**: Process multiple students in one transaction
-- **Account Reuse**: Allow updating existing student records
-- **Storage Efficiency**: Use more compact data types where possible
-
-### Scalability Patterns
-- **Program Derived Addresses (PDAs)**: Deterministic account addresses
-- **Account Indexing**: Maintain lists of all student accounts
-- **Pagination**: Handle large datasets efficiently
 
 ## Conclusion
 
-This student data program demonstrates fundamental Solana development patterns that apply to virtually every blockchain application:
+This student data program demonstrates fundamental Solana development patterns:
 
-1. **Account Management**: Creating, owning, and managing on-chain accounts
+1. **Account Management**: Creating on-chain accounts
 2. **Data Serialization**: Efficiently storing structured data on-chain
 3. **Cross-Program Invocation**: Leveraging existing programs for common operations
-4. **Client Integration**: Building seamless user experiences with proper error handling
+4. **Client Integration**: How client side works on programs
 
-Understanding these concepts provides the foundation for building sophisticated decentralized applications on Solana. The patterns shown here scale from simple data storage to complex DeFi protocols, NFT marketplaces, and gaming applications.
+Remember: Solana development requires thinking in terms of accounts, transactions, and programs working together. 
 
-**Next Steps:**
-- Add update and delete functionality
-- Implement proper access controls
-- Explore Program Derived Addresses (PDAs)
-- Build a full frontend application
-- Study more complex programs in the Solana ecosystem
-
-Remember: Solana development requires thinking in terms of accounts, transactions, and programs working together. Master these fundamentals, and you'll be well-equipped to build the next generation of blockchain applications.
+Code used in the blog: [HERE](https://github.com/4rjunc/solana-programs-list/tree/main/native-account-data)
+Author: [Arjun](https://x.com/4rjunc)
+Github: [4rjunc](https://github.com/4rjunc)
