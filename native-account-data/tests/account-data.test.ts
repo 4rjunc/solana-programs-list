@@ -51,7 +51,7 @@ const StudentSchema = new Map([
 
 describe('Storing Student Data', async () => {
   const student = Keypair.generate();
-  const programID = PublicKey.unique();
+  const programID = new PublicKey("4C2Au9iMf6fgZEvz9EjZBvete8myXjA814XiYYRoGewj")
   const context = await start([{ name: 'account_data', programId: programID }], []);
   const client = context.banksClient;
 
