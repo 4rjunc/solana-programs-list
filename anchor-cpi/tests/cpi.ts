@@ -1,16 +1,105 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Cpi } from "../target/types/cpi";
+import { PublicKey, Keypair } from "@solana/web3.js";
 
-describe("cpi", () => {
+describe("CPI", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace.cpi as Program<Cpi>;
+  const program = anchor.workspace.Cpi as Program<Cpi>;
+  const provider = anchor.getProvider();
+  const user = provider.wallet;
 
-  it("Is initialized!", async () => {
+  it("Create PDA", async () => {
     // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
+    const [messagePda, messageBump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("message"), user.publicKey.toBuffer()],
+      program.programId
+    );
+
+    const message = "Hello, World!";
+    const transactionSignature = await program.methods
+      .create(message)
+      .accounts({
+        messageAccount: messagePda
+      })
+      .rpc({ commitment: "confirmed" });
+
+    const messageAccount = await program.account.messageAccount.fetch(
+      messagePda,
+      "confirmed"
+    );
+
+    console.log(JSON.stringify(messageAccount, null, 2));
+    console.log(
+      "Transaction Signature:",
+      `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    );
   });
+
+  it("Update PDA", async () => {
+    // Add your test here.
+    const [messagePda, messageBump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("message"), user.publicKey.toBuffer()],
+      program.programId
+    );
+
+    const [vaultPda, vaultBump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), user.publicKey.toBuffer()],
+      program.programId
+    );
+
+
+    const message = "Hello Solana World!";
+    const transactionSignature = await program.methods
+      .update(message)
+      .accounts({
+        messageAccount: messagePda,
+        vaultAccount: vaultPda
+      })
+      .rpc({ commitment: "confirmed" });
+
+    const messageAccount = await program.account.messageAccount.fetch(
+      messagePda,
+      "confirmed"
+    );
+
+    console.log(JSON.stringify(messageAccount, null, 2));
+    console.log(
+      "Transaction Signature:",
+      `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    );
+
+  });
+
+  it("Delete PDA", async () => {
+    // Add your test here.
+    const [messagePda, messageBump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("message"), user.publicKey.toBuffer()],
+      program.programId
+    );
+
+    const message = "Hello Solana World!";
+    const transactionSignature = await program.methods
+      .delete()
+      .accounts({
+        messageAccount: messagePda
+      })
+      .rpc({ commitment: "confirmed" });
+
+    const messageAccount = await program.account.messageAccount.fetchNullable(
+      messagePda,
+      "confirmed"
+    );
+
+    console.log(JSON.stringify(messageAccount, null, 2));
+    console.log(
+      "Transaction Signature:",
+      `https://solana.fm/tx/${transactionSignature}?cluster=devnet-solana`
+    );
+
+  });
+
+
 });

@@ -38,7 +38,7 @@ Each program is organized in its own dedicated folder with a clear naming conven
 | Stake      | Stake assets               | `Tokens` `Stake` `Reward`                     | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-staking) 🟡       | NIL      | NIL    |
 | Tic Tac Toe      | Tic Tac Toe               | `PDA` `Mini Game`                      | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-tic-tac-toe) 🟡       | NIL      | NIL    |
 | Token Mint      | Simple Token Mint               | `Token` `Mint`                      | NIL       | [🦀 Program](https://github.com/4rjunc/solana-programs-list/tree/main/native-token) 🟡      | NIL    |
-| Hello World     | Hello World               | `Hello World`                      | NIL       |  NIL      | [🤥 Program](https://github.com/4rjunc/solana-programs-list/tree/main/pinocchio-hello-world)  |
+| CPI      | Simple Programs on CPIs               | `CPI` `Transfers`                      | [⚓ Program](https://github.com/4rjunc/solana-programs-list/tree/main/anchor-cpi) 🟢 ✅       |  NIL      | NIL  |
 
 
 
