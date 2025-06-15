@@ -35,6 +35,30 @@ pub mod cpi {
         account_data.message = message;
         Ok(())
     }
+
+    pub fn delete(ctx: Context<Delete>) -> Result<()> {
+        // delete account
+        // tranfer the update sol back to user
+        msg!("Deleteing");
+        let user_key = ctx.accounts.user.key();
+        let signer_seeds: &[&[&[u8]]] =
+            &[&[b"vault", user_key.as_ref(), &[ctx.bumps.vault_account]]];
+
+        let transfer_accounts = Transfer {
+            from: ctx.accounts.vault_account.to_account_info(),
+            to: ctx.accounts.user.to_account_info(),
+        };
+
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            transfer_accounts,
+        )
+        .with_signer(signer_seeds);
+
+        transfer(cpi_context, ctx.accounts.vault_account.lamports())?;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -67,6 +91,29 @@ pub struct Update<'info> {
         realloc = 8 + 32 + 4 + message.len() + 1,
         realloc::payer = user,
         realloc::zero = true
+    )]
+    pub message_account: Account<'info, MessageAccount>,
+
+    #[account(
+        mut,
+        seeds = [b"vault", user.key().as_ref()],
+        bump,
+    )]
+    pub vault_account: SystemAccount<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Delete<'info> {
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"message", user.key().as_ref()],
+        bump = message_account.bump,
+        close = user,
     )]
     pub message_account: Account<'info, MessageAccount>,
 
