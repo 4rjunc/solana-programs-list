@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
 
 declare_id!("DfrhYpR3Uu751wLkPVC8m6EX4ryQSSzj1XecdcfNEaUj");
 
@@ -18,6 +19,19 @@ pub mod cpi {
     pub fn update(ctx: Context<Update>, message: String) -> Result<()> {
         msg!("Updating message: {}", message);
         let account_data = &mut ctx.accounts.message_account;
+
+        let transfer_accounts = Transfer {
+            from: ctx.accounts.user.to_account_info(),
+            to: ctx.accounts.vault_account.to_account_info(),
+        };
+
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            transfer_accounts,
+        );
+
+        transfer(cpi_context, 1_000_000)?;
+
         account_data.message = message;
         Ok(())
     }
@@ -55,6 +69,14 @@ pub struct Update<'info> {
         realloc::zero = true
     )]
     pub message_account: Account<'info, MessageAccount>,
+
+    #[account(
+        mut,
+        seeds = [b"vault", user.key().as_ref()],
+        bump,
+    )]
+    pub vault_account: SystemAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
