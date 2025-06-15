@@ -1,0 +1,13 @@
+[package]
+name = "blueshift_escrow"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pinocchio = "0.8.4"
+pinocchio-associated-token-account = "0.1.1"
+pinocchio-system = "0.2.3"
+pinocchio-token = "0.3.0"
+
+[lib]
+crate-type = ["lib", "cdylib"]
