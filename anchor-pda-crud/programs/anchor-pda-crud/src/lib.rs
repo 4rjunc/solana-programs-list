@@ -6,7 +6,7 @@ declare_id!("7juzJjc48gDptGouzy2nDfLFY2inVGomDhssbvrVhWjp");
 pub mod anchor_pda_crud {
     use super::*;
 
-    // why taking a &mut reference from ctx.accounts.message_account to account_data
+    // &mut reference to ctx.accounts.message_account because you're modifying the account's data fields.
     pub fn create(ctx: Context<Create>, message: String) -> Result<()> {
         msg!("Creating message: {:}", message);
         let account_data = &mut ctx.accounts.message_account;
