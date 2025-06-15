@@ -18,6 +18,12 @@ pub mod anchor_pda_crud {
 
     pub fn update(ctx: Context<Update>, message: String) -> Result<()> {
         msg!("Updating message: {}", message);
+
+        require!(
+            ctx.accounts.message_account.user == ctx.accounts.user.key(),
+            ErrorCode::UnauthorizedUser
+        );
+
         let account_data = &mut ctx.accounts.message_account;
         account_data.message = message;
         Ok(())
@@ -57,6 +63,7 @@ pub struct Update<'info> {
         seeds = [b"message", user.key().as_ref()],
         bump = message_account.bump,
         realloc = 8 + 32 + 4 + message.len() + 1,
+        constraint = message_account.user == user.key() @ErrorCode::UnauthorizedUser,
         realloc::payer = user,
         realloc::zero = true
     )]
@@ -84,4 +91,10 @@ pub struct MessageAccount {
     pub user: Pubkey,
     pub message: String,
     pub bump: u8,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("UnauthorizedUser")]
+    UnauthorizedUser,
 }
