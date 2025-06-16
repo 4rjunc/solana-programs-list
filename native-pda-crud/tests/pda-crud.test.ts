@@ -11,11 +11,15 @@ enum Instruction {
 
 export class Create {
   instruction: Instruction;
+  user: Uint8Array;
   message: string;
+  bump: number;
 
-  constructor(props: { instruction: Instruction; message: string }) {
+  constructor(props: { instruction: Instruction; user: PublicKey; message: string, bump: number }) {
     this.instruction = props.instruction;
+    this.user = props.user.toBytes();
     this.message = props.message;
+    this.bump = props.bump;
   }
 
   toBuffer() {
@@ -34,7 +38,9 @@ export const CreateSchema = new Map([
       kind: 'struct',
       fields: [
         ['instruction', 'u8'],
+        ['user', [32]],
         ['message', 'string'],
+        ['bump', 'u8']
       ],
     },
   ],
@@ -49,11 +55,16 @@ describe("CRUD on PDA", async () => {
   test("Create Account", async () => {
     const [messagePDA, bump] = PublicKey.findProgramAddressSync([Buffer.from("message"), payer.publicKey.toBuffer()], PROGRAM_ID);
     const message = "Hello, Solana";
+    const user = payer.publicKey;
 
     const instructionObject = new Create({
       instruction: Instruction.Create,
-      message
+      user,
+      message,
+      bump
     })
+
+    console.log("Instruction Object:", instructionObject)
 
     const ix = new TransactionInstruction({
       keys: [
