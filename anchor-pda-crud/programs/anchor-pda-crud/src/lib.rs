@@ -63,7 +63,7 @@ pub struct Update<'info> {
         seeds = [b"message", user.key().as_ref()],
         bump = message_account.bump,
         realloc = 8 + 32 + 4 + message.len() + 1,
-        constraint = message_account.user == user.key() @errorcode::unauthorizeduser,
+        constraint = message_account.user == user.key() @ErrorCode::UnauthorizedUser,
         realloc::payer = user,
         realloc::zero = true
     )]

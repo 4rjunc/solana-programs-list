@@ -12,7 +12,7 @@ anchor_pda_crud = "7juzJjc48gDptGouzy2nDfLFY2inVGomDhssbvrVhWjp"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
