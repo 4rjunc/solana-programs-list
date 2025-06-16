@@ -8,7 +8,7 @@ use solana_program::{
 use crate::instructions::*;
 use crate::state::message::MessageAccount;
 
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub enum Instructions {
     Create(MessageAccount),
     Update(MessageAccount),
@@ -25,16 +25,20 @@ pub fn process_instruction(
     }
 
     let instruction = Instructions::try_from_slice(instruction_data)?;
+    msg!("Received instruction: {:?}", instruction);
 
-    let _ = match instruction {
+    match instruction {
         Instructions::Create(message) => {
             msg!("Create: message {}", message.message);
             create::create(program_id, accounts, message)
         }
-        Instructions::Update(message) => Err(ProgramError::InvalidInstructionData),
-        Instructions::Delete => Err(ProgramError::InvalidInstructionData),
-        _ => Err(ProgramError::InvalidInstructionData),
-    };
-
-    Ok(())
+        Instructions::Update(message) => {
+            msg!("Update instruction not implemented");
+            Err(ProgramError::InvalidInstructionData)
+        }
+        Instructions::Delete => {
+            msg!("Delete instruction not implemented");
+            Err(ProgramError::InvalidInstructionData)
+        }
+    }
 }

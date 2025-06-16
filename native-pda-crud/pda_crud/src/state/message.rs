@@ -1,11 +1,11 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
 
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Debug)]
 pub struct MessageAccount {
-    pub user: Pubkey,
+    //pub user: Pubkey,
     pub message: String,
-    pub bump: u8,
+    //pub bump: u8,
 }
 
 impl MessageAccount {
