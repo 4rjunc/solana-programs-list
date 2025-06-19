@@ -37,8 +37,8 @@ pub fn process_instruction(
             update::update(program_id, accounts, message.message)
         }
         Instructions::Delete => {
-            msg!("Delete instruction not implemented");
-            Err(ProgramError::InvalidInstructionData)
+            msg!("Delete {:?}", accounts);
+            delete::delete(program_id, accounts)
         }
     }
 }
