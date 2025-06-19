@@ -33,8 +33,8 @@ pub fn process_instruction(
             create::create(program_id, accounts, message)
         }
         Instructions::Update(message) => {
-            msg!("Update instruction not implemented");
-            Err(ProgramError::InvalidInstructionData)
+            msg!("Update message {}", message.message);
+            update::update(program_id, accounts, message.message)
         }
         Instructions::Delete => {
             msg!("Delete instruction not implemented");

@@ -9,7 +9,7 @@ enum Instruction {
   Delete = 2
 }
 
-export class Create {
+class Create {
   instruction: Instruction;
   user: Uint8Array;
   message: string;
@@ -34,6 +34,43 @@ export class Create {
 export const CreateSchema = new Map([
   [
     Create,
+    {
+      kind: 'struct',
+      fields: [
+        ['instruction', 'u8'],
+        ['user', [32]],
+        ['message', 'string'],
+        ['bump', 'u8']
+      ],
+    },
+  ],
+]);
+
+class Update {
+  instruction: Instruction;
+  user: Uint8Array;
+  message: string;
+  bump: number;
+
+  constructor(props: { instruction: Instruction; user: PublicKey; message: string, bump: number }) {
+    this.instruction = props.instruction;
+    this.user = props.user.toBytes();
+    this.message = props.message;
+    this.bump = props.bump;
+  }
+
+  toBuffer() {
+    return Buffer.from(borsh.serialize(UpdateSchema, this));
+  }
+
+  static fromBuffer(buffer: Buffer) {
+    return borsh.deserialize(UpdateSchema, Update, buffer);
+  }
+}
+
+export const UpdateSchema = new Map([
+  [
+    Update,
     {
       kind: 'struct',
       fields: [
@@ -82,5 +119,38 @@ describe("CRUD on PDA", async () => {
 
     await client.processTransaction(tx);
   })
+
+  test("Update Account", async () => {
+    const [messagePDA, bump] = PublicKey.findProgramAddressSync([Buffer.from("message"), payer.publicKey.toBuffer()], PROGRAM_ID);
+    const message = "Hello, Solana World";
+    const user = payer.publicKey;
+
+    const instructionObject = new Update({
+      instruction: Instruction.Update,
+      user,
+      message,
+      bump
+    })
+
+    console.log("Instruction Object:", instructionObject)
+
+    const ix = new TransactionInstruction({
+      keys: [
+        { pubkey: messagePDA, isWritable: true, isSigner: false },
+        { pubkey: payer.publicKey, isWritable: true, isSigner: true },
+        { pubkey: SystemProgram.programId, isWritable: false, isSigner: false }
+      ],
+      programId: PROGRAM_ID,
+      data: instructionObject.toBuffer()
+    })
+
+    const tx = new Transaction();
+    tx.recentBlockhash = context.lastBlockhash;
+    tx.add(ix).sign(payer);
+
+    await client.processTransaction(tx);
+  })
+
+
 })
 
