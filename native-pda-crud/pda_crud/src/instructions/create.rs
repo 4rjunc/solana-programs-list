@@ -1,17 +1,15 @@
-use borsh::{to_vec, BorshDeserialize, BorshSerialize};
+use borsh::{to_vec, BorshSerialize};
 
-// use solana system interface crate
+use crate::state::message::MessageAccount;
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     program::invoke_signed,
     pubkey::Pubkey,
     rent::Rent,
-    system_instruction,
     sysvar::Sysvar,
 };
-
-use crate::state::message::MessageAccount;
+use solana_system_interface::instruction;
 
 pub fn create(
     _program_id: &Pubkey,
@@ -32,7 +30,7 @@ pub fn create(
     );
 
     invoke_signed(
-        &system_instruction::create_account(
+        &instruction::create_account(
             payer.key,
             message_account.key,
             lamports_required,
