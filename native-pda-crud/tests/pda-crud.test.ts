@@ -9,6 +9,7 @@ enum Instruction {
   Delete = 2
 }
 
+// Create
 class Create {
   instruction: Instruction;
   user: Uint8Array;
@@ -46,6 +47,7 @@ export const CreateSchema = new Map([
   ],
 ]);
 
+// Update
 class Update {
   instruction: Instruction;
   user: Uint8Array;
@@ -206,8 +208,5 @@ describe("CRUD on PDA", async () => {
 
     await client.processTransaction(tx);
   })
-
-
-
 })
 
