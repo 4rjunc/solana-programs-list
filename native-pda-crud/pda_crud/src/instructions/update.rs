@@ -41,7 +41,7 @@ pub fn update(_program_id: &Pubkey, accounts: &[AccountInfo], message: String) -
         ],
     );
 
-    message_account.realloc(account_span, false)?;
+    message_account.resize(account_span)?;
 
     message_data.serialize(&mut &mut message_account.data.borrow_mut()[..])?;
 
