@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-anchor_pda_crud = "7juzJjc48gDptGouzy2nDfLFY2inVGomDhssbvrVhWjp"
+anchor_pda_crud = "J3WFih3jsqXKiZC764nrqAh8PMtaoJgJ7HKMEFNkqNoc"
 
 [registry]
 url = "https://api.apr.dev"
