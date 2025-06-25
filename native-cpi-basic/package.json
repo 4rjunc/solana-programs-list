@@ -1,0 +1,29 @@
+{
+  "name": "cpi",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@solana/web3.js": "^1.47.3",
+    "fs": "^0.0.1-security",
+    "litesvm": "^0.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/bn.js": "^5.1.0"
+  },
+  "scripts": {
+    "test-cpi-invoke": "bun test tests/cpi-invoke.test.ts --timeout 1000000",
+    "test-cpi-invoke-signed": "bun test tests/cpi-invoke-signed.test.ts --timeout 1000000",
+    "devnet": "bun run tests/devnet.ts --timeout 1000000",
+    "test:watch": "bun test tests/pda-crud.test.ts --watch",
+    "build-cpi": "cargo build-sbf --manifest-path=./cpi-invoke/Cargo.toml --sbf-out-dir=./cpi-invoke/target/so",
+    "build-cpi-signed": "cargo build-sbf --manifest-path=./cpi-invoke-signed/Cargo.toml --sbf-out-dir=./cpi-invoke-signed/target/so",
+    "build-and-test-cpi": "cargo build-sbf --manifest-path=./cpi-invoke/Cargo.toml --sbf-out-dir=./tests/fixtures && bun run test ./tests/cpi-invoke.test.ts",
+    "build-and-test-cpi-signed": "cargo build-sbf --manifest-path=./cpi-invoke-signed/Cargo.toml --sbf-out-dir=./tests/fixtures && bun run test ./tests/cpi-invoke-signed.test.ts",
+    "deploy": "solana program deploy .//target/so/pda_crud.so"
+  }
+}
