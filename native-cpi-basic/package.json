@@ -22,8 +22,8 @@
     "test:watch": "bun test tests/pda-crud.test.ts --watch",
     "build-cpi": "cargo build-sbf --manifest-path=./cpi-invoke/Cargo.toml --sbf-out-dir=./cpi-invoke/target/so",
     "build-cpi-signed": "cargo build-sbf --manifest-path=./cpi-invoke-signed/Cargo.toml --sbf-out-dir=./cpi-invoke-signed/target/so",
-    "build-and-test-cpi": "cargo build-sbf --manifest-path=./cpi-invoke/Cargo.toml --sbf-out-dir=./tests/fixtures && bun run test ./tests/cpi-invoke.test.ts",
-    "build-and-test-cpi-signed": "cargo build-sbf --manifest-path=./cpi-invoke-signed/Cargo.toml --sbf-out-dir=./tests/fixtures && bun run test ./tests/cpi-invoke-signed.test.ts",
+    "build-and-test-cpi": "cargo build-sbf --manifest-path=./cpi-invoke/Cargo.toml --sbf-out-dir=./tests/fixtures && bun test ./tests/cpi-invoke.test.ts",
+    "build-and-test-cpi-signed": "cargo build-sbf --manifest-path=./cpi-invoke-signed/Cargo.toml --sbf-out-dir=./tests/fixtures && bun test ./tests/cpi-invoke-signed.test.ts",
     "deploy": "solana program deploy .//target/so/pda_crud.so"
   }
 }
