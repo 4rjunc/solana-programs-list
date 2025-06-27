@@ -1,0 +1,26 @@
+{
+  "name": "native-escrow",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@solana/web3.js": "^1.47.3",
+    "fs": "^0.0.1-security"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/bn.js": "^5.1.0",
+    "solana-bankrun": "^0.3.0"
+  },
+  "scripts": {
+    "test": "bun test tests/escrow.test.ts --timeout 1000000",
+    "devnet": "bun run tests/devnet.ts --timeout 1000000",
+    "test:watch": "bun test tests/escrow.test.ts --watch",
+    "build": "cargo build-sbf --manifest-path=./escrow/Cargo.toml --sbf-out-dir=./escrow/target/so",
+    "build-and-test": "cargo build-sbf --manifest-path=./escrow/Cargo.toml --sbf-out-dir=./tests/fixtures && bun run test",
+    "deploy": "solana program deploy ./escrow/target/so/pda_crud.so"
+  }
+}
