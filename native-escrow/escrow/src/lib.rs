@@ -1,6 +1,7 @@
 use solana_program::entrypoint;
 
-mod processor;
+pub mod processor;
+pub mod state;
 
 use processor::process_instructions;
 
