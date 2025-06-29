@@ -39,3 +39,7 @@ The `Account` struct is what gets serialized and stored in the `data` field of t
 - is_native: If this is a wrapped SOL account, tracks the rent-exempt reserve
 - delegated_amount: How many tokens the delegate is authorized to spend
 - close_authority: Optional authority that can close this account
+
+Mint Account [code](https://github.com/solana-program/token/blob/6d18ff73b1dd30703a30b1ca941cb0f1d18c2b2a/program/src/state.rs#L16-L30)
+
+Token Account [code](https://github.com/solana-program/token/blob/6d18ff73b1dd30703a30b1ca941cb0f1d18c2b2a/program/src/state.rs#L87-L108)
