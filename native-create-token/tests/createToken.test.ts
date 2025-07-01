@@ -1,4 +1,4 @@
-import { Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, SYSVAR_RENT_PUBKEY, Transaction, TransactionInstruction } from "@solana/web3.js";
+import { Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, SYSVAR_RENT_PUBKEY, Transaction, TransactionInstruction, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { start } from 'solana-bankrun';
@@ -36,7 +36,10 @@ const CreateTokenArgsSchema = new Map([
 describe(("Tokens!"), async () => {
 
   const PROGRAM_ID = new PublicKey("5ECVZ7mxvdftWR9SEVZKGNWdG5Sqdn7qF2wxenxkDLJo");
-  const context = await start([{ name: 'create_token', programId: PROGRAM_ID }], [])
+  const context = await start([{ name: 'create_token', programId: PROGRAM_ID }, {
+    name: 'mpl_token_metadata',
+    programId: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID),
+  },], [])
   const client = context.banksClient;
   const payer = context.payer;
 
@@ -51,9 +54,13 @@ describe(("Tokens!"), async () => {
     });
 
     const [metadataAddress, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from("metadata"),
-      mint_account.publicKey.toBuffer()],
-      new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID));
+      [
+        Buffer.from("metadata"),
+        new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID).toBuffer(),
+        mint_account.publicKey.toBuffer()
+      ],
+      new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID)
+    );
 
     const ix = new TransactionInstruction({
       keys: [
@@ -64,7 +71,8 @@ describe(("Tokens!"), async () => {
         { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
         { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-        { pubkey: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID), isSigner: false, isWritable: false }
+        { pubkey: new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID), isSigner: false, isWritable: false },
+        { pubkey: new PublicKey(SYSVAR_INSTRUCTIONS_PUBKEY), isSigner: false, isWritable: false }
       ],
       programId: PROGRAM_ID,
       data: data.toBuffer()
