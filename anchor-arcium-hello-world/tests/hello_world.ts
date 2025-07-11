@@ -48,6 +48,10 @@ describe("HelloWorld", () => {
 
   const arciumEnv = getArciumEnv();
 
+  console.log("arciumEnv", arciumEnv);
+  
+
+
   it("Is initialized!", async () => {
     const owner = readKpJson(`${os.homedir()}/.config/solana/id.json`);
 
