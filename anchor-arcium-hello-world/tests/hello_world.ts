@@ -18,8 +18,8 @@ import {
   getCompDefAccAddress,
   getExecutingPoolAccAddress,
   getComputationAccAddress,
-  x25519,
 } from "@arcium-hq/client";
+import { x25519 } from '@noble/curves/ed25519';
 import * as fs from "fs";
 import * as os from "os";
 import { expect } from "chai";

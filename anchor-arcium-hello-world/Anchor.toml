@@ -17,3 +17,8 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test.validator]
+[[test.genesis]]
+address = "BKck65TgoKRokMjQM3datB9oRwJ8rAj2jxPXvHXUvcL6"
+program = "/Users/arjunc/Documents/solana/solana-programs-list/anchor-arcium-hello-world/artifacts/arcium_program_0.1.47.so"
