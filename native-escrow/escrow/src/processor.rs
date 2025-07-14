@@ -4,6 +4,7 @@ use solana_program::{
     pubkey::Pubkey,
 };
 
+use crate::instructions::*;
 use crate::state::EscrowAccount;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -25,9 +26,12 @@ pub fn process_instructions(
     let instruction = Instructions::try_from_slice(instruction_data)?;
     msg!("Received instruction: {:?}", instruction);
 
+    //  Make: maker_ta_a → vault (mint_a tokens escrowed)
+    //  Take: vault → taker (mint_a released) + taker → maker (mint_b provided)
+
     match instruction {
-        Instructions::Make(escrow_account) => {
-            msg!("Make: {:?}", escrow_account);
+        Instructions::Make(escrow) => {
+            make::process(accounts, escrow)?;
         }
         Instructions::Take(escrow_account) => {
             msg!("Take: {:?}", escrow_account)
