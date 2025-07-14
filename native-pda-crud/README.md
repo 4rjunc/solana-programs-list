@@ -122,6 +122,24 @@ pub fn create(
 
 - Uses `invoke_signed` because we're creating an account with a PDA (requires signature derivation)
 
+    - `create_account` instruction arguments:
+
+        - `payer.key` - The public key of the account that will pay for the account creation and rent
+        - `message_account.key` - The public key of the new account being created (this is the PDA)
+        - `lamports_required` - The amount of lamports needed to make the account rent-exempt
+        - `account_span` as u64 - The size in bytes that the new account will occupy
+        - `&crate::ID` - The program ID that will own the newly created account
+
+    - invoke_signed function parameters:
+
+        First argument: The instruction to execute (the create_account instruction)
+        Second argument: Array of account infos required by the instruction - the payer (funding the creation), the new message account, and the system program (which handles account creation)
+        Third argument: The signer seeds array, which allows the program to sign on behalf of the PDA
+
+    - PDA Signer Seeds:
+
+        The signer seeds `&[MessageAccount::SEED_PREFIX.as_bytes(), payer.key.as_ref(), &[bump]]` are used to derive and prove ownership of the PDA. These seeds consist of a constant prefix, the payer's public key (making each PDA unique per payer), and a bump seed that ensures the derived address falls off the ed25519 curve, making it a valid PDA. The invoke_signed function uses these seeds to cryptographically prove that the calling program has the authority to create and control this specific PDA, even though programs normally cannot sign transactions.
+
 
 ### Update Operation
 
