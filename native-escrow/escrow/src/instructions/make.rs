@@ -110,7 +110,27 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     //    amount	Amount to transfer (e.g., 1_000_000)
     //    decimals	Token precision (e.g., 6 for USDC)
 
+    // CHECK: vault is owned by escrow pda
+
     let decimals = spl_token::state::Mint::unpack(&mint_a.try_borrow_data()?)?.decimals; // Get token decimals from the mint
+
+    // TODO: vault should be token account, test this
+    //
+    // first try to do it from testcase itself
+    // second comment the code that create vault as token account from client and run the tests
+    // third uncomment the vault creation from program and run test
+    //
+    //invoke_signed(
+    //    &create_account(
+    //        maker.key,
+    //        vault.key,
+    //        rent,
+    //        spl_token::state::Account::LEN as u64,
+    //        &spl_token::ID,
+    //    ),
+    //    &[maker.clone(), vault.clone()],
+    //    &[&[b"vault", escrow.key.as_ref(), &[bump]]],
+    //)?;
 
     invoke(
         &transfer_checked(
