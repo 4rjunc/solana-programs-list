@@ -40,7 +40,12 @@ pub fn process(accounts: &[AccountInfo]) -> ProgramResult {
     }
 
     // Check mint account to escrow data
+    assert_eq!(mint_a.key, &escrow_data.mint_a);
+    assert_eq!(mint_b.key, &escrow_data.mint_b);
+
     // Get decimals of token
+    let decimals_a = spl_token::state::Mint::unpack(&mint_a.try_borrow_data()?)?.decimals; // Get token decimals from the mint_a
+    let decimals_b = spl_token::state::Mint::unpack(&mint_b.try_borrow_data()?)?.decimals; // Get token decimals from the mint_b
 
     Ok(())
 }
