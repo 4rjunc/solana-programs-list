@@ -10,7 +10,7 @@ use crate::state::EscrowAccount;
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub enum Instructions {
     Make(EscrowAccount),
-    Take(EscrowAccount),
+    Take,
     Refund(EscrowAccount),
 }
 
@@ -33,8 +33,8 @@ pub fn process_instructions(
         Instructions::Make(escrow) => {
             make::process(accounts, escrow)?;
         }
-        Instructions::Take(escrow_account) => {
-            msg!("Take: {:?}", escrow_account)
+        Instructions::Take => {
+            take::process(accounts)?;
         }
         Instructions::Refund(escrow_account) => {
             msg!("Refund: {:?}", escrow_account)
