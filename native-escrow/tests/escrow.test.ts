@@ -1,111 +1,107 @@
-
-import { PublicKey, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
-import { start } from 'solana-bankrun';
-import { describe, test } from "bun:test";
-import * as borsh from 'borsh';
+import { LiteSVM } from "litesvm";
+import {
+  PublicKey,
+  TransactionInstruction,
+  Transaction,
+  SystemProgram,
+  Keypair,
+  LAMPORTS_PER_SOL
+} from "@solana/web3.js";
+import {
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
+  createMintToInstruction,
+  createInitializeMintInstruction,
+  MINT_SIZE,
+  getMinimumBalanceForRentExemptMint,
+  getAccount
+} from "@solana/spl-token";
+import * as borsh from "borsh";
+import { describe, test, beforeAll, beforeEach, expect } from "bun:test";
+import * as path from 'path';
 
 enum Instruction {
-  Create = 0,
-  Update = 1,
-  Delete = 2
+  Make = 0,
+  Take = 1,
+  Refund = 2
 }
 
-// Create
-class Create {
+class EscrowAccount {
   instruction: Instruction;
-  user: Uint8Array;
-  message: string;
-  bump: number;
+  seed: bigint;
+  amount: bigint;
+  receive: bigint;
 
-  constructor(props: { instruction: Instruction; user: PublicKey; message: string, bump: number }) {
+  constructor(props: { instruction: Instruction; seed: bigint; amount: bigint, receive: bigint }) {
     this.instruction = props.instruction;
-    this.user = props.user.toBytes();
-    this.message = props.message;
-    this.bump = props.bump;
+    this.seed = props.seed;
+    this.amount = props.seed;
+    this.receive = props.receive;
   }
 
   toBuffer() {
-    return Buffer.from(borsh.serialize(CreateSchema, this));
-  }
-
-  static fromBuffer(buffer: Buffer) {
-    return borsh.deserialize(CreateSchema, Create, buffer);
+    return Buffer.from(borsh.serialize(EscrowAccountSchema, this));
   }
 }
 
-export const CreateSchema = new Map([
+export const EscrowAccountSchema = new Map([
   [
-    Create,
+    EscrowAccount,
     {
       kind: 'struct',
       fields: [
         ['instruction', 'u8'],
-        ['user', [32]],
-        ['message', 'string'],
-        ['bump', 'u8']
+        ['seed', 'u64'],
+        ['amount', 'u64'],
+        ['receive', 'u64']
       ],
     },
   ],
 ]);
 
-// Update
-class Update {
+// Take
+class Take {
   instruction: Instruction;
-  user: Uint8Array;
-  message: string;
-  bump: number;
 
-  constructor(props: { instruction: Instruction; user: PublicKey; message: string, bump: number }) {
-    this.instruction = props.instruction;
-    this.user = props.user.toBytes();
-    this.message = props.message;
-    this.bump = props.bump;
+  constructor() {
+    this.instruction = Instruction.Take;
   }
 
   toBuffer() {
-    return Buffer.from(borsh.serialize(UpdateSchema, this));
-  }
-
-  static fromBuffer(buffer: Buffer) {
-    return borsh.deserialize(UpdateSchema, Update, buffer);
+    return Buffer.from(borsh.serialize(TakeSchema, this));
   }
 }
 
-export const UpdateSchema = new Map([
+export const TakeSchema = new Map([
   [
-    Update,
+    Take,
     {
       kind: 'struct',
       fields: [
         ['instruction', 'u8'],
-        ['user', [32]],
-        ['message', 'string'],
-        ['bump', 'u8']
       ],
     },
   ],
 ]);
 
-// Delete
-class Delete {
+// Refund
+class Refund {
   instruction: Instruction;
 
-  constructor(props: { instruction: Instruction; }) {
-    this.instruction = props.instruction;
+  constructor() {
+    this.instruction = Instruction.Take;
   }
 
   toBuffer() {
-    return Buffer.from(borsh.serialize(DeleteSchema, this));
-  }
-
-  static fromBuffer(buffer: Buffer) {
-    return borsh.deserialize(DeleteSchema, Delete, buffer);
+    return Buffer.from(borsh.serialize(RefundSchema, this));
   }
 }
 
-export const DeleteSchema = new Map([
+export const RefundSchema = new Map([
   [
-    Delete,
+    Take,
     {
       kind: 'struct',
       fields: [
@@ -116,97 +112,270 @@ export const DeleteSchema = new Map([
 ]);
 
 
-describe("CRUD on PDA", async () => {
-  const PROGRAM_ID = new PublicKey("5zUvdtYXnCHkyBMi5y8FcMeGtWd2H23Dwp8yiScHkwru");
-  const context = await start([{ name: 'pda_crud', programId: PROGRAM_ID }], [])
-  const client = context.banksClient;
-  const payer = context.payer;
+describe("ESCROW BABY!", async () => {
+  const PROGRAM_ID = new PublicKey("CCeMau8P6tMvjqBMfUnN5mcsqN3vyn9xTLSpdapbXDUq");
+  let svm: LiteSVM;
+  let maker: Keypair;
+  let taker: Keypair;
+  let mintA: Keypair;
+  let mintB: Keypair;
+  let makerTokenAccountA: PublicKey;
+  let makerTokenAccountB: PublicKey;
+  let takerTokenAccountA: PublicKey;
+  let takerTokenAccountB: PublicKey;
+  let vault: PublicKey;
+  let escrow: PublicKey;
+  let seed: bigint;
+  let amount: bigint;
+  let receive: bigint;
 
-  test("Create Account", async () => {
-    const [messagePDA, bump] = PublicKey.findProgramAddressSync([Buffer.from("message"), payer.publicKey.toBuffer()], PROGRAM_ID);
-    const message = "Hello, Solana";
-    const user = payer.publicKey;
+  beforeAll(async () => {
+    svm = new LiteSVM();
+    maker = new Keypair();
+    taker = new Keypair();
 
-    const instructionObject = new Create({
-      instruction: Instruction.Create,
-      user,
-      message,
-      bump
-    })
+    svm.airdrop(maker.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
+    svm.airdrop(taker.publicKey, BigInt(10 * LAMPORTS_PER_SOL));
 
-    console.log("Instruction Object:", instructionObject)
+    // load program
+    const program = path.join(`${__dirname}/fixtures`, "escrow.so")
+    svm.addProgramFromFile(PROGRAM_ID, program)
+  });
 
-    const ix = new TransactionInstruction({
+
+  beforeEach(async () => {
+    seed = BigInt(2002);
+    amount = BigInt(1000000); // 1 token with 6 decimals
+    receive = BigInt(2000000); // 2 tokens with 6 decimals
+
+    // Create fresh mints for each test
+    mintA = new Keypair();
+    mintB = new Keypair();
+
+    await setupMints();
+    await createEscrow();
+  });
+
+  async function setupMints() {
+    const mintALamports = svm.getRent();
+
+    // Create and initialize mint A
+    const createMintAIx = SystemProgram.createAccount({
+      fromPubkey: maker.publicKey,
+      newAccountPubkey: mintA.publicKey,
+      lamports: mintALamports,
+      space: MINT_SIZE,
+      programId: TOKEN_PROGRAM_ID,
+    });
+
+    const initMintAIx = createInitializeMintInstruction(
+      mintA.publicKey,
+      6, // decimals
+      maker.publicKey, // mint authority
+      maker.publicKey  // freeze authority
+    );
+
+    // Create and initialize mint B
+    const createMintBIx = SystemProgram.createAccount({
+      fromPubkey: maker.publicKey,
+      newAccountPubkey: mintB.publicKey,
+      lamports: mintALamports,
+      space: MINT_SIZE,
+      programId: TOKEN_PROGRAM_ID,
+    });
+
+    const initMintBIx = createInitializeMintInstruction(
+      mintB.publicKey,
+      6, // decimals
+      maker.publicKey, // mint authority
+      maker.publicKey  // freeze authority
+    );
+
+    // Create token accounts
+    makerTokenAccountA = await getAssociatedTokenAddress(mintA.publicKey, maker.publicKey);
+    makerTokenAccountB = await getAssociatedTokenAddress(mintB.publicKey, maker.publicKey);
+    takerTokenAccountA = await getAssociatedTokenAddress(mintA.publicKey, taker.publicKey);
+    takerTokenAccountB = await getAssociatedTokenAddress(mintB.publicKey, taker.publicKey);
+
+    const createMakerTAAIx = createAssociatedTokenAccountInstruction(
+      maker.publicKey,
+      makerTokenAccountA,
+      maker.publicKey,
+      mintA.publicKey
+    );
+
+    const createMakerTABIx = createAssociatedTokenAccountInstruction(
+      maker.publicKey,
+      makerTokenAccountB,
+      maker.publicKey,
+      mintB.publicKey
+    );
+
+    const createTakerTAAIx = createAssociatedTokenAccountInstruction(
+      taker.publicKey,
+      takerTokenAccountA,
+      taker.publicKey,
+      mintA.publicKey
+    );
+
+    const createTakerTABIx = createAssociatedTokenAccountInstruction(
+      taker.publicKey,
+      takerTokenAccountB,
+      taker.publicKey,
+      mintB.publicKey
+    );
+
+    // Mint tokens
+    const mintToMakerAIx = createMintToInstruction(
+      mintA.publicKey,
+      makerTokenAccountA,
+      maker.publicKey,
+      amount * BigInt(10)
+    );
+
+    const mintToTakerBIx = createMintToInstruction(
+      mintB.publicKey,
+      takerTokenAccountB,
+      maker.publicKey,
+      receive * BigInt(10)
+    );
+
+    const setupTx = new Transaction();
+    setupTx.recentBlockhash = svm.latestBlockhash();
+    setupTx.add(
+      createMintAIx,
+      initMintAIx,
+      createMintBIx,
+      initMintBIx,
+      createMakerTAAIx,
+      createMakerTABIx,
+      createTakerTAAIx,
+      createTakerTABIx,
+      mintToMakerAIx,
+      mintToTakerBIx
+    );
+    setupTx.sign(maker, taker, mintA, mintB);
+
+    svm.sendTransaction(setupTx);
+  }
+
+  async function createEscrow() {
+    // Derive PDAs
+    const [escrowPDA] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("escrow"),
+        maker.publicKey.toBuffer(),
+        Buffer.from(new Array(8).fill(0).map((_, i) => Number((seed >> BigInt(i * 8)) & BigInt(0xff))))
+      ],
+      PROGRAM_ID
+    );
+    escrow = escrowPDA;
+
+    const [vaultPDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), escrow.toBuffer()],
+      PROGRAM_ID
+    );
+    vault = vaultPDA;
+
+    // Create vault token account
+    const createVaultIx = createAssociatedTokenAccountInstruction(
+      maker.publicKey,
+      vault,
+      escrow,
+      mintA.publicKey
+    );
+
+    // Create Make instruction
+    const makeInstruction = new EscrowAccount({
+      instruction: Instruction.Make,
+      seed,
+      amount,
+      receive
+    });
+
+    const makeIx = new TransactionInstruction({
       keys: [
-        { pubkey: messagePDA, isWritable: true, isSigner: false },
-        { pubkey: payer.publicKey, isWritable: true, isSigner: true },
+        { pubkey: maker.publicKey, isWritable: true, isSigner: true },
+        { pubkey: mintA.publicKey, isWritable: false, isSigner: false },
+        { pubkey: mintB.publicKey, isWritable: false, isSigner: false },
+        { pubkey: makerTokenAccountA, isWritable: true, isSigner: false },
+        { pubkey: escrow, isWritable: true, isSigner: false },
+        { pubkey: vault, isWritable: true, isSigner: false },
+        { pubkey: TOKEN_PROGRAM_ID, isWritable: false, isSigner: false },
         { pubkey: SystemProgram.programId, isWritable: false, isSigner: false }
       ],
       programId: PROGRAM_ID,
-      data: instructionObject.toBuffer()
-    })
+      data: makeInstruction.toBuffer()
+    });
 
-    const tx = new Transaction();
-    tx.recentBlockhash = context.lastBlockhash;
-    tx.add(ix).sign(payer);
+    const makeTx = new Transaction();
+    makeTx.recentBlockhash = svm.latestBlockhash();
+    makeTx.add(createVaultIx, makeIx);
+    makeTx.sign(maker);
 
-    await client.processTransaction(tx);
+    svm.sendTransaction(makeTx);
+  }
+
+  test("Make", async () => {
+
+    amount = BigInt(1000000); // 1 token with 6 decimals
+    receive = BigInt(2000000); // 2 tokens with 6 decimals
+
+    const takeInstruction = new Take();
+
+    const takeIx = new TransactionInstruction({
+      keys: [
+        { pubkey: taker.publicKey, isWritable: true, isSigner: true },        // taker
+        { pubkey: maker.publicKey, isWritable: true, isSigner: false },       // maker
+        { pubkey: mintA.publicKey, isWritable: false, isSigner: false },      // mint_a
+        { pubkey: mintB.publicKey, isWritable: false, isSigner: false },      // mint_b
+        { pubkey: takerTokenAccountA, isWritable: true, isSigner: false },    // taker_ta_a
+        { pubkey: takerTokenAccountB, isWritable: true, isSigner: false },    // taker_ta_b
+        { pubkey: makerTokenAccountB, isWritable: true, isSigner: false },    // maker_ta_b
+        { pubkey: escrow, isWritable: true, isSigner: false },                // escrow
+        { pubkey: vault, isWritable: true, isSigner: false },                 // vault
+        { pubkey: TOKEN_PROGRAM_ID, isWritable: false, isSigner: false },     // token_program
+        { pubkey: SystemProgram.programId, isWritable: false, isSigner: false } // system_program
+      ],
+      programId: PROGRAM_ID,
+      data: takeInstruction.toBuffer()
+    });
+
+    // Get balances before
+    const takerBalanceABefore = svm.getBalance(takerTokenAccountA);
+    const makerBalanceBBefore = svm.getBalance(makerTokenAccountB);
+
+    const takeTx = new Transaction();
+    takeTx.recentBlockhash = svm.latestBlockhash();
+    takeTx.add(takeIx);
+    takeTx.sign(taker);
+
+    svm.sendTransaction(takeTx);
+
+    // Verify token transfers
+    const takerTokenAAccount = svm.getAccount(takerTokenAccountA);
+    const makerTokenBAccount = svm.getAccount(makerTokenAccountB);
+
+    expect(takerTokenAAccount?.lamports).toBe(Number(amount));
+    expect(makerTokenBAccount?.lamports).toBe(Number(receive));
+
+    // Verify escrow account is closed
+    const escrowAccount = svm.getAccount(escrow);
+    expect(escrowAccount).toBeNull();
+
+    // Verify vault is closed
+    const vaultAccount = svm.getAccount(vault);
+    expect(vaultAccount).toBeNull();
+
+    console.log("Take escrow successful!");
+    console.log(`Taker received ${amount} tokens of mint A`);
+    console.log(`Maker received ${receive} tokens of mint B`);
   })
 
-  test("Update Account", async () => {
-    const [messagePDA, bump] = PublicKey.findProgramAddressSync([Buffer.from("message"), payer.publicKey.toBuffer()], PROGRAM_ID);
-    const message = "Hello, Solana World";
-    const user = payer.publicKey;
+  test("Take", async () => {
 
-    const instructionObject = new Update({
-      instruction: Instruction.Update,
-      user,
-      message,
-      bump
-    })
-
-    console.log("Instruction Object:", instructionObject)
-
-    const ix = new TransactionInstruction({
-      keys: [
-        { pubkey: messagePDA, isWritable: true, isSigner: false },
-        { pubkey: payer.publicKey, isWritable: true, isSigner: true },
-        { pubkey: SystemProgram.programId, isWritable: false, isSigner: false }
-      ],
-      programId: PROGRAM_ID,
-      data: instructionObject.toBuffer()
-    })
-
-    const tx = new Transaction();
-    tx.recentBlockhash = context.lastBlockhash;
-    tx.add(ix).sign(payer);
-
-    await client.processTransaction(tx);
   })
 
-  test("Delete Account", async () => {
-    const [messagePDA, bump] = PublicKey.findProgramAddressSync([Buffer.from("message"), payer.publicKey.toBuffer()], PROGRAM_ID);
-
-    const instructionObject = new Delete({
-      instruction: Instruction.Delete,
-    })
-
-    console.log("Instruction Object:", instructionObject)
-
-    const ix = new TransactionInstruction({
-      keys: [
-        { pubkey: messagePDA, isWritable: true, isSigner: false },
-        { pubkey: payer.publicKey, isWritable: true, isSigner: true },
-        { pubkey: SystemProgram.programId, isWritable: false, isSigner: false }
-      ],
-      programId: PROGRAM_ID,
-      data: instructionObject.toBuffer()
-    })
-
-    const tx = new Transaction();
-    tx.recentBlockhash = context.lastBlockhash;
-    tx.add(ix).sign(payer);
-
-    await client.processTransaction(tx);
+  test("Refund", async () => {
   })
 })
