@@ -262,13 +262,12 @@ describe("ESCROW BABY!", async () => {
 
     svm.sendTransaction(setupTx);
 
+    // checking account balances
     const makerTokenAAccountBefore = svm.getAccount(makerTokenAccountA);
     const takerTokenBAccountBefore = svm.getAccount(takerTokenAccountB);
     const makerTokenADataBefore = AccountLayout.decode(makerTokenAAccountBefore.data);
     const takerTokenBDataBefore = AccountLayout.decode(takerTokenBAccountBefore.data);
-
     console.log(`Tokens Minted\nmaker TokenA: ${makerTokenADataBefore.amount}\ntaker TokenB: ${takerTokenBDataBefore.amount}`);
-
   }
 
   async function createEscrow() {
@@ -326,6 +325,15 @@ describe("ESCROW BABY!", async () => {
     makeTx.sign(maker);
 
     svm.sendTransaction(makeTx);
+
+    // const vaultAccount = svm.getAccount(vaultPDA);
+    // const escrowAccount = svm.getAccount(escrowPDA);
+    // const vaultAccountData = AccountLayout.decode(vaultAccount.data);
+    // const escrowAccountData = AccountLayout.decode(escrowAccount.data);
+    //
+    // console.log(`vaultAccount: ${vaultAccountData}`);
+    // console.log(`escrowAccount: ${escrowAccountData}`);
+
   }
 
   test("TAKE", async () => {
