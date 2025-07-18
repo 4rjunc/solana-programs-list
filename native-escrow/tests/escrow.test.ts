@@ -271,12 +271,15 @@ describe("ESCROW BABY!", async () => {
   }
 
   async function createEscrow() {
+    const seedBuffer = Buffer.allocUnsafe(8);
+    seedBuffer.writeBigUInt64LE(seed, 0); // Convert to little-endian bytes like Rust does
+
     // derive PDAs
     const [escrowPDA] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("escrow"),
         maker.publicKey.toBuffer(),
-        Buffer.from(seed.toString())
+        seedBuffer
       ],
       PROGRAM_ID
     );
@@ -324,7 +327,12 @@ describe("ESCROW BABY!", async () => {
     makeTx.add(createVaultIx, makeIx);
     makeTx.sign(maker);
 
-    svm.sendTransaction(makeTx);
+    try {
+      const result = svm.sendTransaction(makeTx);
+      console.log("Transaction successful:", result);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
 
     // const vaultAccount = svm.getAccount(vaultPDA);
     // const escrowAccount = svm.getAccount(escrowPDA);
