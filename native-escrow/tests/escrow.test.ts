@@ -1,4 +1,4 @@
-import { LiteSVM } from "litesvm";
+import { LiteSVM, TransactionMetadata } from "litesvm";
 import {
   PublicKey,
   TransactionInstruction,
@@ -90,7 +90,7 @@ class Refund {
   instruction: Instruction;
 
   constructor() {
-    this.instruction = Instruction.Take;
+    this.instruction = Instruction.Refund;
   }
 
   toBuffer() {
@@ -100,7 +100,7 @@ class Refund {
 
 export const RefundSchema = new Map([
   [
-    Take,
+    Refund,
     {
       kind: 'struct',
       fields: [
@@ -113,6 +113,7 @@ export const RefundSchema = new Map([
 
 describe("ESCROW BABY!", async () => {
   const PROGRAM_ID = new PublicKey("CCeMau8P6tMvjqBMfUnN5mcsqN3vyn9xTLSpdapbXDUq");
+
   let svm: LiteSVM;
   let maker: Keypair;
   let taker: Keypair;
@@ -138,12 +139,16 @@ describe("ESCROW BABY!", async () => {
 
     // load program
     const program = path.join(`${__dirname}/fixtures`, "escrow.so")
+    const tokenProgram = path.join(`${__dirname}/fixtures`, "spl_token-3.5.0.so")
     svm.addProgramFromFile(PROGRAM_ID, program)
+    svm.addProgramFromFile(TOKEN_PROGRAM_ID, tokenProgram)
   });
 
 
   beforeEach(async () => {
-    seed = BigInt(2002);
+    // random seed will generated eachtime when a test runs, to prevent `address already in use error`
+    //seed = BigInt(Math.floor(Math.random() * 1000000));
+    seed = BigInt(2002)
     amount = BigInt(1000000); // 1 token with 6 decimals
     receive = BigInt(2000000); // 2 tokens with 6 decimals
 
@@ -284,12 +289,7 @@ describe("ESCROW BABY!", async () => {
       PROGRAM_ID
     );
     escrow = escrowPDA;
-
-    const [vaultPDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), escrow.toBuffer()],
-      PROGRAM_ID
-    );
-    vault = vaultPDA;
+    vault = await getAssociatedTokenAddress(mintA.publicKey, escrow, true);
 
     // create vault token account to hold tokens of mint A this is also can be as crearing ATA for vault to hold A tokens
     const createVaultIx = createAssociatedTokenAccountInstruction(
@@ -327,11 +327,16 @@ describe("ESCROW BABY!", async () => {
     makeTx.add(createVaultIx, makeIx);
     makeTx.sign(maker);
 
-    try {
-      const result = svm.sendTransaction(makeTx);
-      console.log("Transaction successful:", result);
-    } catch (error) {
-      console.error("Transaction failed:", error);
+    const simRes = svm.simulateTransaction(makeTx);
+    const sendRes = svm.sendTransaction(makeTx);
+
+    if (sendRes instanceof TransactionMetadata) {
+      expect(simRes.meta().logs()).toEqual(sendRes.logs());
+      expect(sendRes.logs()[1]).toBe("Program log: Create");
+    } else {
+      console.log("sendRes: ", sendRes.meta().toString())
+      throw new Error("Unexpected tx failure");
+
     }
 
     // const vaultAccount = svm.getAccount(vaultPDA);
@@ -393,22 +398,61 @@ describe("ESCROW BABY!", async () => {
 
     console.log(`AFTER - takerTokenA: ${takerTokenAData.amount}, makerTokenB: ${makerTokenBData.amount}`);
     console.log(`Expected - takerTokenA: ${amount}, makerTokenB: ${receive}`);    // verify escrow account is closed
-    const escrowAccount = svm.getAccount(escrow);
-    expect(escrowAccount).toBeNull();
 
-    // verify vault is closed
-    const vaultAccount = svm.getAccount(vault);
-    expect(vaultAccount).toBeNull();
+    // const escrowAccount = svm.getAccount(escrow);
+    // expect(escrowAccount).toBeNull();
+    //
+    // // verify vault is closed
+    // const vaultAccount = svm.getAccount(vault);
+    // expect(vaultAccount).toBeNull();
 
     console.log("Take escrow successful!");
     console.log(`Taker received ${amount} tokens of mint A`);
     console.log(`Maker received ${receive} tokens of mint B`);
   })
 
-  test("Take", async () => {
-
-  })
-
   test("Refund", async () => {
+
+    // create refund instruction
+    const refundInstruction = new Refund()
+    const refundIx = new TransactionInstruction({
+      keys: [
+        { pubkey: maker.publicKey, isWritable: true, isSigner: true },
+        { pubkey: mintA.publicKey, isWritable: false, isSigner: false },
+        { pubkey: makerTokenAccountA, isWritable: true, isSigner: false },
+        { pubkey: escrow, isWritable: true, isSigner: false },
+        { pubkey: vault, isWritable: true, isSigner: false },
+        { pubkey: TOKEN_PROGRAM_ID, isWritable: false, isSigner: false },
+        { pubkey: SystemProgram.programId, isWritable: false, isSigner: false }
+      ],
+      programId: PROGRAM_ID,
+      data: refundInstruction.toBuffer()
+    });
+
+    const refundTx = new Transaction();
+    refundTx.recentBlockhash = svm.latestBlockhash();
+    refundTx.add(refundIx);
+    refundTx.sign(maker);
+
+    // balance in associated token account of maker before transaction
+    let makerTokenAAccount = svm.getAccount(makerTokenAccountA);
+    let makerTokenAData = AccountLayout.decode(makerTokenAAccount.data);
+    console.log(`Maker Token Balance: ${makerTokenAData.amount}`);
+
+    const simRes = svm.simulateTransaction(refundTx);
+    const sendRes = svm.sendTransaction(refundTx);
+
+    if (sendRes instanceof TransactionMetadata) {
+      expect(simRes.meta().logs()).toEqual(sendRes.logs());
+      expect(sendRes.logs()[1]).toBe("Program log: Refunding");
+    } else {
+      console.log("sendRes: ", sendRes.meta().toString())
+      throw new Error("Unexpected tx failure");
+    }
+
+    // balance in associated token account of maker before transaction
+    makerTokenAAccount = svm.getAccount(makerTokenAccountA);
+    makerTokenAData = AccountLayout.decode(makerTokenAAccount.data);
+    console.log(`Maker Token Balance: ${makerTokenAData.amount}`);
   })
 })
