@@ -148,7 +148,7 @@ describe("ESCROW BABY!", async () => {
     amount = BigInt(1000000); // 1 token with 6 decimals
     receive = BigInt(2000000); // 2 tokens with 6 decimals
 
-    // Create fresh mints for each test
+    // create new tokens A, B for every testcase
     mintA = new Keypair();
     mintB = new Keypair();
 
@@ -191,12 +191,13 @@ describe("ESCROW BABY!", async () => {
       maker.publicKey  // freeze authority
     );
 
-    // Create token accounts
+    // create token accounts/associated token accounts for maker and payer of both A and B tokens
     makerTokenAccountA = await getAssociatedTokenAddress(mintA.publicKey, maker.publicKey);
     makerTokenAccountB = await getAssociatedTokenAddress(mintB.publicKey, maker.publicKey);
     takerTokenAccountA = await getAssociatedTokenAddress(mintA.publicKey, taker.publicKey);
     takerTokenAccountB = await getAssociatedTokenAddress(mintB.publicKey, taker.publicKey);
 
+    // instruction to create associated token account of mintA for maker 
     const createMakerTAAIx = createAssociatedTokenAccountInstruction(
       maker.publicKey,
       makerTokenAccountA,
@@ -204,6 +205,7 @@ describe("ESCROW BABY!", async () => {
       mintA.publicKey
     );
 
+    // instruction to create associated token account of mintB for maker 
     const createMakerTABIx = createAssociatedTokenAccountInstruction(
       maker.publicKey,
       makerTokenAccountB,
@@ -211,6 +213,7 @@ describe("ESCROW BABY!", async () => {
       mintB.publicKey
     );
 
+    // instruction to create associated token account of mintA for taker 
     const createTakerTAAIx = createAssociatedTokenAccountInstruction(
       taker.publicKey,
       takerTokenAccountA,
@@ -218,6 +221,7 @@ describe("ESCROW BABY!", async () => {
       mintA.publicKey
     );
 
+    // instruction to create associated token account of mintB for taker 
     const createTakerTABIx = createAssociatedTokenAccountInstruction(
       taker.publicKey,
       takerTokenAccountB,
@@ -225,7 +229,7 @@ describe("ESCROW BABY!", async () => {
       mintB.publicKey
     );
 
-    // Mint tokens
+    // mint A tokens to maker's wallet 
     const mintToMakerAIx = createMintToInstruction(
       mintA.publicKey,
       makerTokenAccountA,
@@ -233,6 +237,7 @@ describe("ESCROW BABY!", async () => {
       amount * BigInt(10)
     );
 
+    // mint B tokens to taker's wallet 
     const mintToTakerBIx = createMintToInstruction(
       mintB.publicKey,
       takerTokenAccountB,
@@ -260,12 +265,12 @@ describe("ESCROW BABY!", async () => {
   }
 
   async function createEscrow() {
-    // Derive PDAs
+    // derive PDAs
     const [escrowPDA] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("escrow"),
         maker.publicKey.toBuffer(),
-        Buffer.from(new Array(8).fill(0).map((_, i) => Number((seed >> BigInt(i * 8)) & BigInt(0xff))))
+        Buffer.from(seed.toString())
       ],
       PROGRAM_ID
     );
@@ -277,7 +282,7 @@ describe("ESCROW BABY!", async () => {
     );
     vault = vaultPDA;
 
-    // Create vault token account
+    // create vault token account to hold tokens of mint A this is also can be as crearing ATA for vault to hold A tokens
     const createVaultIx = createAssociatedTokenAccountInstruction(
       maker.publicKey,
       vault,
@@ -285,7 +290,7 @@ describe("ESCROW BABY!", async () => {
       mintA.publicKey
     );
 
-    // Create Make instruction
+    // create Make instruction
     const makeInstruction = new EscrowAccount({
       instruction: Instruction.Make,
       seed,
@@ -329,9 +334,9 @@ describe("ESCROW BABY!", async () => {
         { pubkey: maker.publicKey, isWritable: true, isSigner: false },       // maker
         { pubkey: mintA.publicKey, isWritable: false, isSigner: false },      // mint_a
         { pubkey: mintB.publicKey, isWritable: false, isSigner: false },      // mint_b
-        { pubkey: takerTokenAccountA, isWritable: true, isSigner: false },    // taker_ta_a
-        { pubkey: takerTokenAccountB, isWritable: true, isSigner: false },    // taker_ta_b
-        { pubkey: makerTokenAccountB, isWritable: true, isSigner: false },    // maker_ta_b
+        { pubkey: takerTokenAccountA, isWritable: true, isSigner: false },    // taker_ata_a
+        { pubkey: takerTokenAccountB, isWritable: true, isSigner: false },    // taker_ata_b
+        { pubkey: makerTokenAccountB, isWritable: true, isSigner: false },    // maker_ata_b
         { pubkey: escrow, isWritable: true, isSigner: false },                // escrow
         { pubkey: vault, isWritable: true, isSigner: false },                 // vault
         { pubkey: TOKEN_PROGRAM_ID, isWritable: false, isSigner: false },     // token_program
@@ -341,7 +346,7 @@ describe("ESCROW BABY!", async () => {
       data: takeInstruction.toBuffer()
     });
 
-    // Get balances before
+    // balances before
     const takerBalanceABefore = svm.getBalance(takerTokenAccountA);
     const makerBalanceBBefore = svm.getBalance(makerTokenAccountB);
 
@@ -352,18 +357,18 @@ describe("ESCROW BABY!", async () => {
 
     svm.sendTransaction(takeTx);
 
-    // Verify token transfers
+    // verify token transfers
     const takerTokenAAccount = svm.getAccount(takerTokenAccountA);
     const makerTokenBAccount = svm.getAccount(makerTokenAccountB);
 
     expect(takerTokenAAccount?.lamports).toBe(Number(amount));
     expect(makerTokenBAccount?.lamports).toBe(Number(receive));
 
-    // Verify escrow account is closed
+    // verify escrow account is closed
     const escrowAccount = svm.getAccount(escrow);
     expect(escrowAccount).toBeNull();
 
-    // Verify vault is closed
+    // verify vault is closed
     const vaultAccount = svm.getAccount(vault);
     expect(vaultAccount).toBeNull();
 
