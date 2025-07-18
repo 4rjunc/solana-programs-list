@@ -50,7 +50,7 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     // Make logic
     // derive pda for escrow account
     let (escrow_pda, bump) = Pubkey::find_program_address(
-        &[b"escrow", maker.key.as_ref(), &seed.to_le_bytes()],
+        &[b"escrow", maker.key.as_ref(), &seed.to_le_bytes().as_ref()],
         &crate::ID,
     );
 
@@ -59,7 +59,7 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     }
 
     // INITIALIZING
-    msg!("Initializing escrow account");
+    msg!("Initializing escrow");
     let space = core::mem::size_of::<Escrow>();
     let rent = Rent::get()?.minimum_balance(space);
 
@@ -77,7 +77,12 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     invoke_signed(
         &create_account(maker.key, escrow.key, rent, space as u64, &crate::ID),
         &[maker.clone(), escrow.clone(), _system_program.clone()],
-        &[&[b"escrow", maker.key.as_ref(), &seed.to_le_bytes(), &[bump]]],
+        &[&[
+            b"escrow",
+            maker.key.as_ref(),
+            &seed.to_le_bytes().as_ref(),
+            &[bump],
+        ]],
     )?;
 
     // saving escrow data after serializing
@@ -109,10 +114,6 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     //    &[]	No signer seeds used (not a PDA)
     //    amount	Amount to transfer (e.g., 1_000_000)
     //    decimals	Token precision (e.g., 6 for USDC)
-
-    if vault.owner != escrow.key {
-        return Err(ProgramError::IllegalOwner);
-    }
 
     let decimals = spl_token::state::Mint::unpack(&mint_a.try_borrow_data()?)?.decimals; // Get token decimals from the mint
 

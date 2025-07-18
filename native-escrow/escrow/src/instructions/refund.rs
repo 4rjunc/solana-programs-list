@@ -21,6 +21,7 @@ pub fn process(accounts: &[AccountInfo]) -> ProgramResult {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
+    msg!("Refunding");
     // Make sure the maker is a signer
     assert!(maker.is_signer);
 

@@ -24,7 +24,7 @@ pub fn process_instructions(
     }
 
     let instruction = Instructions::try_from_slice(instruction_data)?;
-    msg!("Received instruction: {:?}", instruction);
+    //msg!("Received instruction: {:?}", instruction);
 
     //  Make: maker_ta_a → vault (mint_a tokens escrowed)
     //  Take: vault → taker (mint_a released) + taker → maker (mint_b provided)
