@@ -101,7 +101,7 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     //    It safely transfers amount of mint_a tokens from maker_ta_a (maker’s token account) to vault
     //
     //    Argument Description of transfer_checked
-    //    token_program.key	The SPL Token program ID (spl_token::ID)
+    //    token_program.key	The SPL Token program ID
     //    maker_ta_a.key	The source token account (user's wallet TA)
     //    mint_a.key	The mint of the token (for checked decimals)
     //    vault.key	The destination token account (like escrow)
@@ -110,7 +110,9 @@ pub fn process(accounts: &[AccountInfo], data: EscrowAccount) -> ProgramResult {
     //    amount	Amount to transfer (e.g., 1_000_000)
     //    decimals	Token precision (e.g., 6 for USDC)
 
-    // CHECK: vault is owned by escrow pda
+    if vault.owner != escrow.key {
+        return Err(ProgramError::IllegalOwner);
+    }
 
     let decimals = spl_token::state::Mint::unpack(&mint_a.try_borrow_data()?)?.decimals; // Get token decimals from the mint
 
