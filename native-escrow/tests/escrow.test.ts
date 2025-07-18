@@ -316,7 +316,7 @@ describe("ESCROW BABY!", async () => {
     svm.sendTransaction(makeTx);
   }
 
-  test("Make", async () => {
+  test("TAKE", async () => {
 
     amount = BigInt(1000000); // 1 token with 6 decimals
     receive = BigInt(2000000); // 2 tokens with 6 decimals
