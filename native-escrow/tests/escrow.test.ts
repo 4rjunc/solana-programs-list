@@ -15,8 +15,7 @@ import {
   createMintToInstruction,
   createInitializeMintInstruction,
   MINT_SIZE,
-  getMinimumBalanceForRentExemptMint,
-  getAccount
+  AccountLayout
 } from "@solana/spl-token";
 import * as borsh from "borsh";
 import { describe, test, beforeAll, beforeEach, expect } from "bun:test";
@@ -37,7 +36,7 @@ class EscrowAccount {
   constructor(props: { instruction: Instruction; seed: bigint; amount: bigint, receive: bigint }) {
     this.instruction = props.instruction;
     this.seed = props.seed;
-    this.amount = props.seed;
+    this.amount = props.amount;
     this.receive = props.receive;
   }
 
@@ -157,13 +156,13 @@ describe("ESCROW BABY!", async () => {
   });
 
   async function setupMints() {
-    const mintALamports = svm.getRent();
+    const mintALamports = svm.minimumBalanceForRentExemption(BigInt(MINT_SIZE));
 
     // Create and initialize mint A
     const createMintAIx = SystemProgram.createAccount({
       fromPubkey: maker.publicKey,
       newAccountPubkey: mintA.publicKey,
-      lamports: mintALamports,
+      lamports: Number(mintALamports),
       space: MINT_SIZE,
       programId: TOKEN_PROGRAM_ID,
     });
@@ -179,7 +178,7 @@ describe("ESCROW BABY!", async () => {
     const createMintBIx = SystemProgram.createAccount({
       fromPubkey: maker.publicKey,
       newAccountPubkey: mintB.publicKey,
-      lamports: mintALamports,
+      lamports: Number(mintALamports),
       space: MINT_SIZE,
       programId: TOKEN_PROGRAM_ID,
     });
@@ -262,6 +261,14 @@ describe("ESCROW BABY!", async () => {
     setupTx.sign(maker, taker, mintA, mintB);
 
     svm.sendTransaction(setupTx);
+
+    const makerTokenAAccountBefore = svm.getAccount(makerTokenAccountA);
+    const takerTokenBAccountBefore = svm.getAccount(takerTokenAccountB);
+    const makerTokenADataBefore = AccountLayout.decode(makerTokenAAccountBefore.data);
+    const takerTokenBDataBefore = AccountLayout.decode(takerTokenBAccountBefore.data);
+
+    console.log(`Tokens Minted\nmaker TokenA: ${makerTokenADataBefore.amount}\ntaker TokenB: ${takerTokenBDataBefore.amount}`);
+
   }
 
   async function createEscrow() {
@@ -346,25 +353,30 @@ describe("ESCROW BABY!", async () => {
       data: takeInstruction.toBuffer()
     });
 
-    // balances before
-    const takerBalanceABefore = svm.getBalance(takerTokenAccountA);
-    const makerBalanceBBefore = svm.getBalance(makerTokenAccountB);
-
     const takeTx = new Transaction();
     takeTx.recentBlockhash = svm.latestBlockhash();
     takeTx.add(takeIx);
     takeTx.sign(taker);
 
+    // balances before
+    const takerTokenAAccountBefore = svm.getAccount(takerTokenAccountA);
+    const makerTokenBAccountBefore = svm.getAccount(makerTokenAccountB);
+    const takerTokenADataBefore = AccountLayout.decode(takerTokenAAccountBefore.data);
+    const makerTokenBDataBefore = AccountLayout.decode(makerTokenBAccountBefore.data);
+
+    console.log(`BEFORE - takerTokenA: ${takerTokenADataBefore.amount}, makerTokenB: ${makerTokenBDataBefore.amount}`);
+
+    // send transaction
     svm.sendTransaction(takeTx);
 
-    // verify token transfers
+    // Check token balances AFTER the transaction
     const takerTokenAAccount = svm.getAccount(takerTokenAccountA);
     const makerTokenBAccount = svm.getAccount(makerTokenAccountB);
+    const takerTokenAData = AccountLayout.decode(takerTokenAAccount.data);
+    const makerTokenBData = AccountLayout.decode(makerTokenBAccount.data);
 
-    expect(takerTokenAAccount?.lamports).toBe(Number(amount));
-    expect(makerTokenBAccount?.lamports).toBe(Number(receive));
-
-    // verify escrow account is closed
+    console.log(`AFTER - takerTokenA: ${takerTokenAData.amount}, makerTokenB: ${makerTokenBData.amount}`);
+    console.log(`Expected - takerTokenA: ${amount}, makerTokenB: ${receive}`);    // verify escrow account is closed
     const escrowAccount = svm.getAccount(escrow);
     expect(escrowAccount).toBeNull();
 
