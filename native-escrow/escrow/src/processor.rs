@@ -11,7 +11,7 @@ use crate::state::EscrowAccount;
 pub enum Instructions {
     Make(EscrowAccount),
     Take,
-    Refund(EscrowAccount),
+    Refund,
 }
 
 pub fn process_instructions(
@@ -36,8 +36,8 @@ pub fn process_instructions(
         Instructions::Take => {
             take::process(accounts)?;
         }
-        Instructions::Refund(escrow_account) => {
-            msg!("Refund: {:?}", escrow_account)
+        Instructions::Refund => {
+            refund::process(accounts)?;
         }
     }
 
