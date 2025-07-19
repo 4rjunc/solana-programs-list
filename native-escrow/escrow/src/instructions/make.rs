@@ -1,5 +1,5 @@
 use crate::state::{Escrow, EscrowAccount};
-use borsh::{BorshDeserialize, BorshSerialize};
+use borsh::BorshSerialize;
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,

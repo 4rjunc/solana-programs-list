@@ -9,7 +9,6 @@ import {
 } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   createMintToInstruction,
@@ -276,6 +275,9 @@ describe("ESCROW BABY!", async () => {
   }
 
   async function createEscrow() {
+
+    console.log("Creating a new ESCROW (Make)");
+
     const seedBuffer = Buffer.allocUnsafe(8);
     seedBuffer.writeBigUInt64LE(seed, 0); // Convert to little-endian bytes like Rust does
 
@@ -324,8 +326,48 @@ describe("ESCROW BABY!", async () => {
 
     const makeTx = new Transaction();
     makeTx.recentBlockhash = svm.latestBlockhash();
+
+    // this transaction has instructions for two different programs 
+    // 1. to create ATA for escrowPDA is vault to associated token program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL 
+    // 2. to the escrow program to invoke make instruction 
+    // either both succeed or both fail together
     makeTx.add(createVaultIx, makeIx);
     makeTx.sign(maker);
+
+    /* // REMOVE THIS LINE TO PRINT THE INSTRUCTIONS AND TRANSACTION OBJECT
+
+    // print createVaultIx details
+    console.log("=== createVaultIx ===");
+    console.log(`Program ID: ${createVaultIx.programId.toBase58()}`);
+    console.log(`Data length: ${createVaultIx.data.length}`);
+    console.log(`Data (hex): ${createVaultIx.data.toString('hex')}`);
+    console.log("Keys:");
+    createVaultIx.keys.forEach((key, index) => {
+      console.log(`  [${index}] ${key.pubkey.toBase58()} (writable: ${key.isWritable}, signer: ${key.isSigner})`);
+    });
+
+    // print makeIx details
+    console.log("\n=== makeIx ===");
+    console.log(`Program ID: ${makeIx.programId.toBase58()}`);
+    console.log(`Data length: ${makeIx.data.length}`);
+    console.log(`Data (hex): ${makeIx.data.toString('hex')}`);
+    console.log("Keys:");
+    makeIx.keys.forEach((key, index) => {
+      console.log(`  [${index}] ${key.pubkey.toBase58()} (writable: ${key.isWritable}, signer: ${key.isSigner})`);
+    });
+
+    // print transaction details
+    console.log("\n=== makeTx ===");
+    console.log(`Recent blockhash: ${makeTx.recentBlockhash}`);
+    console.log(`Fee payer: ${makeTx.feePayer?.toBase58()}`);
+    console.log(`Instructions count: ${makeTx.instructions.length}`);
+    console.log("Signatures:");
+    makeTx.signatures.forEach((sig, index) => {
+      console.log(`  [${index}] PublicKey: ${sig.publicKey.toBase58()}`);
+      console.log(`       Signature: ${sig.signature ? Buffer.from(sig.signature).toString('hex') : 'null'}`);
+    });
+
+    */ // REMOVE THIS LINE TO PRINT THE INSTRUCTIONS AND TRANSACTION OBJECT
 
     const simRes = svm.simulateTransaction(makeTx);
     const sendRes = svm.sendTransaction(makeTx);
@@ -380,8 +422,8 @@ describe("ESCROW BABY!", async () => {
     takeTx.sign(taker);
 
     // balances before
-    const takerTokenAAccountBefore = svm.getAccount(takerTokenAccountA);
-    const makerTokenBAccountBefore = svm.getAccount(makerTokenAccountB);
+    const takerTokenAAccountBefore = svm.getAccount(takerTokenAccountA)!;
+    const makerTokenBAccountBefore = svm.getAccount(makerTokenAccountB)!;
     const takerTokenADataBefore = AccountLayout.decode(takerTokenAAccountBefore.data);
     const makerTokenBDataBefore = AccountLayout.decode(makerTokenBAccountBefore.data);
 
@@ -391,8 +433,8 @@ describe("ESCROW BABY!", async () => {
     svm.sendTransaction(takeTx);
 
     // Check token balances AFTER the transaction
-    const takerTokenAAccount = svm.getAccount(takerTokenAccountA);
-    const makerTokenBAccount = svm.getAccount(makerTokenAccountB);
+    const takerTokenAAccount = svm.getAccount(takerTokenAccountA)!;
+    const makerTokenBAccount = svm.getAccount(makerTokenAccountB)!;
     const takerTokenAData = AccountLayout.decode(takerTokenAAccount.data);
     const makerTokenBData = AccountLayout.decode(makerTokenBAccount.data);
 
@@ -435,7 +477,7 @@ describe("ESCROW BABY!", async () => {
     refundTx.sign(maker);
 
     // balance in associated token account of maker before transaction
-    let makerTokenAAccount = svm.getAccount(makerTokenAccountA);
+    let makerTokenAAccount = svm.getAccount(makerTokenAccountA)!;
     let makerTokenAData = AccountLayout.decode(makerTokenAAccount.data);
     console.log(`Maker Token Balance: ${makerTokenAData.amount}`);
 
@@ -451,7 +493,7 @@ describe("ESCROW BABY!", async () => {
     }
 
     // balance in associated token account of maker before transaction
-    makerTokenAAccount = svm.getAccount(makerTokenAccountA);
+    makerTokenAAccount = svm.getAccount(makerTokenAccountA)!;
     makerTokenAData = AccountLayout.decode(makerTokenAAccount.data);
     console.log(`Maker Token Balance: ${makerTokenAData.amount}`);
   })
