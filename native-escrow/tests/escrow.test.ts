@@ -138,9 +138,9 @@ describe("ESCROW BABY!", async () => {
 
     // load program
     const program = path.join(`${__dirname}/fixtures`, "escrow.so")
-    const tokenProgram = path.join(`${__dirname}/fixtures`, "spl_token-3.5.0.so")
+    //const tokenProgram = path.join(`${__dirname}/fixtures`, "spl_token-3.5.0.so")
     svm.addProgramFromFile(PROGRAM_ID, program)
-    svm.addProgramFromFile(TOKEN_PROGRAM_ID, tokenProgram)
+    //svm.addProgramFromFile(TOKEN_PROGRAM_ID, tokenProgram)
   });
 
 
