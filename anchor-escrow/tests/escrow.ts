@@ -20,7 +20,7 @@ describe("escrow", () => {
 
     const airdropAmount = 10 * LAMPORTS_PER_SOL;
 
-    // Airdrop SOL in parallel
+    // airdrop SOL in parallel
     const [makerSig, takerSig] = await Promise.all([
       provider.connection.requestAirdrop(maker.publicKey, airdropAmount),
       provider.connection.requestAirdrop(taker.publicKey, airdropAmount)
@@ -31,7 +31,7 @@ describe("escrow", () => {
       provider.connection.confirmTransaction(takerSig, 'confirmed')
     ]);
 
-    // Step 1: Create both mints first (parallel)
+    // create both mints first (parallel)
     const mintA = Keypair.generate();
     const mintB = Keypair.generate();
 
@@ -128,7 +128,7 @@ describe("escrow", () => {
       )
     );
 
-    // Execute mint creation in parallel
+    //  mint creation 
     const [signatureMaker, signatureTaker] = await Promise.all([
       sendAndConfirmTransaction(provider.connection, mintCreationTxA, [maker, mintA]),
       sendAndConfirmTransaction(provider.connection, mintCreationTxB, [taker, mintB])
@@ -141,7 +141,7 @@ describe("escrow", () => {
       `Your transaction signature Taker: https://explorer.solana.com/transaction/${signatureTaker}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`
     );
 
-    // Step 2: Now create cross ATAs (both mints exist on-chain)
+    // now create cross ATAs 
     const makerAtaB = getAssociatedTokenAddressSync(mintB.publicKey, maker.publicKey);
     const takerAtaA = getAssociatedTokenAddressSync(mintA.publicKey, taker.publicKey);
 
@@ -153,7 +153,7 @@ describe("escrow", () => {
       createAssociatedTokenAccountInstruction(taker.publicKey, takerAtaA, taker.publicKey, mintA.publicKey)
     );
 
-    // Execute cross ATA creation in parallel
+    // cross ATA creation in parallel
     await Promise.all([
       sendAndConfirmTransaction(provider.connection, crossAtaTxMaker, [maker]),
       sendAndConfirmTransaction(provider.connection, crossAtaTxTaker, [taker])
@@ -167,7 +167,7 @@ describe("escrow", () => {
     console.log("Taker's ATA A:", takerAtaA.toBase58());
     console.log("Taker's ATA B:", takerAtaB.toBase58());
 
-    // Verify balances
+    // verify balances
     const [makerBalance, takerBalance] = await Promise.all([
       getAccount(provider.connection, makerAtaA, "confirmed"),
       getAccount(provider.connection, takerAtaB, "confirmed")
@@ -181,7 +181,6 @@ describe("escrow", () => {
     console.log("\n============================================================\n")
 
     // escrow pda 
-
     const seed = new BN(randomBytes(8));
     const escrow = PublicKey.findProgramAddressSync(
       [
