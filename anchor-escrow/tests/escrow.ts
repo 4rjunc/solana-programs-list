@@ -3,7 +3,6 @@ import { Program, BN } from "@coral-xyz/anchor";
 import { TOKEN_PROGRAM_ID, MINT_SIZE, getMinimumBalanceForRentExemptMint, createInitializeMintInstruction, getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, createMintToInstruction, getAccount, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey, Keypair, LAMPORTS_PER_SOL, SystemProgram, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { Escrow } from "../target/types/escrow";
-import * as fs from "fs";
 import { randomBytes } from "crypto";
 import { assert } from "chai";
 
