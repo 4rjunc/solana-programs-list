@@ -271,13 +271,13 @@ describe("escrow", () => {
         .signers([maker])
         .rpc();
 
-      console.log(`Make transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`);
+      console.log(`\nMake transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`);
 
       // ===== VERIFICATION =====
 
       // 1. Check that escrow account was created with correct data
       const escrowAccount = await program.account.escrowState.fetch(escrowPda);
-      console.log("=== ESCROW STATE VERIFICATION ===");
+      console.log("\n=== ESCROW STATE VERIFICATION ===");
       console.log("Escrow Seed:", escrowAccount.seed.toString());
       console.log("Escrow Maker:", escrowAccount.maker.toBase58());
       console.log("Escrow Mint A:", escrowAccount.mintA.toBase58());
@@ -293,7 +293,7 @@ describe("escrow", () => {
 
       // 2. Check that vault was created and received the deposited tokens
       const vaultAccount = await getAccount(provider.connection, vaultPda, "confirmed");
-      console.log("=== VAULT VERIFICATION ===");
+      console.log("\n=== VAULT VERIFICATION ===");
       console.log("Vault Token A balance:", Number(vaultAccount.amount));
       console.log("Vault Mint:", vaultAccount.mint.toBase58());
       console.log("Vault Owner:", vaultAccount.owner.toBase58());
@@ -305,13 +305,13 @@ describe("escrow", () => {
 
       // 3. Check that maker's Token A balance decreased by deposit amount
       const makerAtaAAfter = await getAccount(provider.connection, makerAtaA, "confirmed");
-      console.log("=== MAKER BALANCE VERIFICATION ===");
+      console.log("\n=== MAKER BALANCE VERIFICATION ===");
       console.log("Maker's Token A balance after:", Number(makerAtaAAfter.amount));
 
       const expectedMakerBalance = Number(makerAtaABefore.amount) - depositAmount.toNumber();
       assert.equal(Number(makerAtaAAfter.amount), expectedMakerBalance, "Maker balance didn't decrease correctly");
 
-      console.log("✅ Make instruction executed successfully!");
+      console.log("\n✅ Make instruction executed successfully!");
       console.log(`✅ Escrow created with ${depositAmount} Token A deposited`);
       console.log(`✅ Maker wants ${receiveAmount} Token B in return`);
 
@@ -389,7 +389,7 @@ describe("escrow", () => {
         .signers([taker])
         .rpc();
 
-      console.log(`Take transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`);
+      console.log(`\nTake transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`);
 
       // Get final balances
       const [takerAtaBAfter, makerAtaBAfter, takerAtaAAfter] = await Promise.all([
@@ -402,6 +402,25 @@ describe("escrow", () => {
       console.log("Taker's Token B balance:", Number(takerAtaBAfter.amount));
       console.log("Maker's Token B balance:", Number(makerAtaBAfter.amount));
       console.log("Taker's Token A balance:", Number(takerAtaAAfter.amount));
+
+      console.log("\n=== Take VERIFICATION ===");
+
+      // 3. MAKER AND TAKER 
+      console.log("\n=== MAKER BALANCE VERIFICATION ===");
+      console.log("Maker's Token B balance after:", Number(makerAtaBAfter.amount));
+      assert.equal(Number(makerAtaBAfter.amount), receiveAmount, "Maker didn't receive requested amount of token B");
+
+      console.log("\n=== TAKER BALANCE VERIFICATION ===");
+      console.log("Taker's Token A balance after:", Number(takerAtaAAfter.amount));
+      console.log("Taker's Token B balance after:", Number(takerAtaBAfter.amount));
+      assert.equal(Number(takerAtaAAfter.amount), depositAmount, "Taker didn't receive deposit amount of token A");
+
+      console.log("\n✅ Take instruction executed successfully!");
+      console.log(`✅ Escrow created with ${depositAmount} Token A deposited`);
+      console.log(`✅ Taker received ${Number(takerAtaAAfter.amount)} Token A`);
+      console.log(`✅ Maker received ${Number(makerAtaBAfter.amount)} Token B`);
+
+
 
       console.log("\n============================================================\n")
 
