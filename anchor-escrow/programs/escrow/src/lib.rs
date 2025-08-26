@@ -5,7 +5,7 @@ pub mod state;
 
 use self::contexts::*;
 
-declare_id!("B7xXE92N35vPUFQtxtJ9ycnDqLRw3HtKqjNSdKgG4CP8");
+declare_id!("3mTs3YNzFV9g3dgQb1FDdarKDtrVcMq2qZE1pfgiuF8P");
 
 #[program]
 pub mod escrow {
