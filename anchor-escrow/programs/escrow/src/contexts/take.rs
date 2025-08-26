@@ -92,7 +92,7 @@ impl<'info> Take<'info> {
 
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, &signers_seeds);
 
-        transfer_checked(cpi_ctx, self.escrow.receive_amount, self.mint_a.decimals)?;
+        transfer_checked(cpi_ctx, self.escrow.deposit_amount, self.mint_a.decimals)?;
         Ok(())
     }
 
@@ -115,7 +115,7 @@ impl<'info> Take<'info> {
         let signers_seeds = [&seeds[..]];
 
         let cpi_ctx = CpiContext::new_with_signer(
-            self.system_program.to_account_info(),
+            self.token_program.to_account_info(),
             cpi_accounts,
             &signers_seeds,
         );

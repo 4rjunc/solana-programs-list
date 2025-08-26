@@ -6,7 +6,7 @@ use crate::state::EscrowState;
 
 
 #[derive(Accounts)]
-#[instruction(seeds: u8)] 
+#[instruction(seeds: u64)] 
 pub struct Make<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
@@ -39,13 +39,14 @@ pub struct Make<'info> {
 }
 
 impl<'info> Make<'info> {
-    pub fn make(&mut self, seed: u64, receive_amount: u64, bumps: &MakeBumps) -> Result<()> {
+    pub fn make(&mut self, seed: u64, deposit_amount: u64, receive_amount: u64, bumps: &MakeBumps) -> Result<()> {
         self.escrow.set_inner(EscrowState {
             seed,
             maker: self.maker.key(),
             mint_a: self.mint_a.key(),
             mint_b: self.mint_b.key(),
             receive_amount,
+            deposit_amount,
             bump: bumps.escrow,
         });
         Ok(())
