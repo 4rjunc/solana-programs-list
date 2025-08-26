@@ -38,31 +38,94 @@ describe("escrow", () => {
     const takerAtaB = getAssociatedTokenAddressSync(mintB.publicKey, taker.publicKey);
 
     const mintCreationTxA = new Transaction().add(
+      // 1. CREATE: Allocate space on-chain for the new mint account
+      //    - Pays rent to make account rent-exempt
+      //    - Assigns ownership to Token Program
+      //    - Creates empty account with MINT_SIZE bytes
       SystemProgram.createAccount({
-        fromPubkey: maker.publicKey,
-        newAccountPubkey: mintA.publicKey,
-        space: MINT_SIZE,
-        lamports: await getMinimumBalanceForRentExemptMint(provider.connection),
-        programId: TOKEN_PROGRAM_ID
+        fromPubkey: maker.publicKey,        // Who pays for the account creation
+        newAccountPubkey: mintA.publicKey,  // Address of the new mint account
+        space: MINT_SIZE,                   // Size needed for mint data (82 bytes)
+        lamports: await getMinimumBalanceForRentExemptMint(provider.connection), // Rent deposit
+        programId: TOKEN_PROGRAM_ID         // Token Program will own this account
       }),
-      createInitializeMintInstruction(mintA.publicKey, 9, maker.publicKey, maker.publicKey),
-      createAssociatedTokenAccountInstruction(maker.publicKey, makerAtaA, maker.publicKey, mintA.publicKey),
-      createMintToInstruction(mintA.publicKey, makerAtaA, maker.publicKey, 100)
+
+      // 2. INITIALIZE: Configure the mint with decimals and authorities
+      //    - Sets decimal precision (9 = can have 0.000000001 tokens)
+      //    - mint_authority: who can create new tokens
+      //    - freeze_authority: who can freeze token accounts (same as mint_authority here)
+      createInitializeMintInstruction(
+        mintA.publicKey,    // The mint account to initialize
+        9,                  // Decimal places (9 = standard SPL token precision)
+        maker.publicKey,    // Mint authority (can create new tokens)
+        maker.publicKey     // Freeze authority (can freeze accounts)
+      ),
+
+      // 3. CREATE ATA: Create Associated Token Account for the maker to hold tokens
+      //    - Deterministic address based on (owner + mint)
+      //    - Standard way to hold SPL tokens
+      createAssociatedTokenAccountInstruction(
+        maker.publicKey,    // Payer for ATA creation
+        makerAtaA,         // The ATA address (computed earlier)
+        maker.publicKey,    // Owner of the token account
+        mintA.publicKey     // Which mint this ATA is for
+      ),
+
+      // 4. MINT TOKENS: Create 100 tokens and deposit them into maker's ATA
+      //    - Only mint_authority can do this
+      //    - Increases total supply of the token
+      createMintToInstruction(
+        mintA.publicKey,    // Which mint to create tokens from
+        makerAtaA,         // Destination token account
+        maker.publicKey,    // Mint authority (must sign transaction)
+        100                 // Amount to mint (in smallest unit, so 100 tokens)
+      )
     );
 
     const mintCreationTxB = new Transaction().add(
+      // 1. CREATE: Allocate space on-chain for the new mint account
+      //    - Pays rent to make account rent-exempt
+      //    - Assigns ownership to Token Program
+      //    - Creates empty account with MINT_SIZE bytes
       SystemProgram.createAccount({
-        fromPubkey: taker.publicKey,
-        newAccountPubkey: mintB.publicKey,
-        space: MINT_SIZE,
-        lamports: await getMinimumBalanceForRentExemptMint(provider.connection),
-        programId: TOKEN_PROGRAM_ID
+        fromPubkey: taker.publicKey,        // Who pays for the account creation
+        newAccountPubkey: mintB.publicKey,  // Address of the new mint account
+        space: MINT_SIZE,                   // Size needed for mint data (82 bytes)
+        lamports: await getMinimumBalanceForRentExemptMint(provider.connection), // Rent deposit
+        programId: TOKEN_PROGRAM_ID         // Token Program will own this account
       }),
-      createInitializeMintInstruction(mintB.publicKey, 9, taker.publicKey, taker.publicKey),
-      createAssociatedTokenAccountInstruction(taker.publicKey, takerAtaB, taker.publicKey, mintB.publicKey),
-      createMintToInstruction(mintB.publicKey, takerAtaB, taker.publicKey, 100)
-    );
 
+      // 2. INITIALIZE: Configure the mint with decimals and authorities
+      //    - Sets decimal precision (9 = can have 0.000000001 tokens)
+      //    - mint_authority: who can create new tokens
+      //    - freeze_authority: who can freeze token accounts (same as mint_authority here)
+      createInitializeMintInstruction(
+        mintB.publicKey,    // The mint account to initialize
+        9,                  // Decimal places (9 = standard SPL token precision)
+        taker.publicKey,    // Mint authority (can create new tokens)
+        taker.publicKey     // Freeze authority (can freeze accounts)
+      ),
+
+      // 3. CREATE ATA: Create Associated Token Account for the taker to hold tokens
+      //    - Deterministic address based on (owner + mint)
+      //    - Standard way to hold SPL tokens
+      createAssociatedTokenAccountInstruction(
+        taker.publicKey,    // Payer for ATA creation
+        takerAtaB,         // The ATA address (computed earlier)
+        taker.publicKey,    // Owner of the token account
+        mintB.publicKey     // Which mint this ATA is for
+      ),
+
+      // 4. MINT TOKENS: Create 100 tokens and deposit them into taker's ATA
+      //    - Only mint_authority can do this
+      //    - Increases total supply of the token
+      createMintToInstruction(
+        mintB.publicKey,    // Which mint to create tokens from
+        takerAtaB,         // Destination token account
+        taker.publicKey,    // Mint authority (must sign transaction)
+        100                 // Amount to mint (in smallest unit, so 100 tokens)
+      )
+    );
     // Execute mint creation in parallel
     await Promise.all([
       sendAndConfirmTransaction(provider.connection, mintCreationTxA, [maker, mintA]),
