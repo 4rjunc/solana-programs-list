@@ -126,11 +126,19 @@ describe("escrow", () => {
         100                 // Amount to mint (in smallest unit, so 100 tokens)
       )
     );
+
     // Execute mint creation in parallel
-    await Promise.all([
+    const [signatureMaker, signatureTaker] = await Promise.all([
       sendAndConfirmTransaction(provider.connection, mintCreationTxA, [maker, mintA]),
       sendAndConfirmTransaction(provider.connection, mintCreationTxB, [taker, mintB])
     ]);
+
+    console.log(
+      `Your transaction signature Maker: https://explorer.solana.com/transaction/${signatureMaker}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`
+    );
+    console.log(
+      `Your transaction signature Taker: https://explorer.solana.com/transaction/${signatureTaker}?cluster=custom&customUrl=${provider.connection.rpcEndpoint}`
+    );
 
     // Step 2: Now create cross ATAs (both mints exist on-chain)
     const makerAtaB = getAssociatedTokenAddressSync(mintB.publicKey, maker.publicKey);
@@ -186,8 +194,6 @@ describe("escrow", () => {
 
   it("Is initialized!", async () => {
     // Add your test here.
-    console.log(`ATA Maker`, associatedTokenAccountMakerMintA);
-
     const tx = await program.methods.initialize().rpc();
     console.log("Your transaction signature", tx);
   });
