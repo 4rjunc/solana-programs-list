@@ -1,10 +1,11 @@
 use anchor_lang::prelude::*;
 
-//pub mod instructions;
-//pub mod states;
-//
-//use crate::instructions::*;
-//use crate::states::*;
+pub mod errors;
+pub mod instructions;
+pub mod states;
+
+use crate::instructions::*;
+use crate::states::*;
 
 declare_id!("9k23tjYUuhUq9AJVdsGU81FXiSTd2qjCGsqt2K7uNc8D");
 
@@ -17,9 +18,9 @@ pub mod bonding_curve {
         Ok(())
     }
 
-    //pub fn config(ctx: Context<Configure>, new_config: ConfigSettings) -> Results<()> {
-    //    ctx.accounts.process(new_config)
-    //}
+    pub fn config(ctx: Context<Configure>, new_config: ConfigSettings) -> Result<()> {
+        ctx.accounts.process(new_config)
+    }
 }
 
 #[derive(Accounts)]
