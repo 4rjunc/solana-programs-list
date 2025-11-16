@@ -38,6 +38,18 @@ impl<'info> Configure<'info> {
             Error::UnauthorizedAddress
         );
 
+        self.master_config.authority = new_config.authority;
+        self.master_config.fee_recipient = new_config.fee_recipient;
+        self.master_config.curve_limit = new_config.curve_limit;
+        self.master_config.initial_real_token_reserve = new_config.initial_real_token_reserve;
+        self.master_config.initial_virtual_sol_reserve = new_config.initial_virtual_sol_reserve;
+        self.master_config.initial_virtual_token_reserve = new_config.initial_virtual_token_reserve;
+        self.master_config.total_token_supply = new_config.total_token_supply;
+        self.master_config.buy_fee_percentage = new_config.buy_fee_percentage;
+        self.master_config.sell_fee_percentage = new_config.sell_fee_percentage;
+        self.master_config.migration_fee_percentage = new_config.migration_fee_percentage;
+        self.master_config.reserved = new_config.reserved;
+
         Ok(())
     }
 }
