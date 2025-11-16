@@ -18,6 +18,7 @@ pub struct Configure<'info> {
     )]
     master_config: Account<'info, Config>,
 
+    #[account(address = system_program::ID)]
     system_program: Program<'info, System>,
 }
 
@@ -31,6 +32,11 @@ impl<'info> Configure<'info> {
                 Error::UnauthorizedAddress
             )
         }
+
+        require!(
+            !new_config.authority.eq(&Pubkey::default()),
+            Error::UnauthorizedAddress
+        );
 
         Ok(())
     }
