@@ -19,6 +19,7 @@ pub mod bonding_curve {
     }
 
     pub fn config(ctx: Context<Configure>, new_config: ConfigSettings) -> Result<()> {
+        msg!("Config");
         ctx.accounts.process(new_config)
     }
 }
