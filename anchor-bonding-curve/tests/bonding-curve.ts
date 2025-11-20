@@ -29,6 +29,9 @@ describe("bonding-curve", () => {
   const creator = Keypair.generate();
   const user = Keypair.generate();
 
+  console.log("creator address: ", creator.publicKey.toBase58())
+  console.log("user address: ", user.publicKey.toBase58())
+
   const name = "TOKENS";
   const symbol = "TKN";
   const uri = "https://tokn.uri";
