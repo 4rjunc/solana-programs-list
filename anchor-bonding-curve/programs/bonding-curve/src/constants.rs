@@ -1,0 +1,7 @@
+pub const TOKEN_DECIMAL: u8 = 6;
+
+pub const TARGET_SOL_AMOUNT: u64 = 42_000_000_000;
+pub const INITIAL_SOL_RESERVE: u64 = 12_330_000_000;
+pub const TOKEN_RESERVE_PERCENTAGE: f64 = 0.8;
+pub const CRR: f64 = 1.314;
+pub const LAMPORTS_PER_SOL: u64 = 1_000_000_000;
