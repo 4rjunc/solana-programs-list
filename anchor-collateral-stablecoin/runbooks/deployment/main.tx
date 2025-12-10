@@ -1,0 +1,15 @@
+################################################################
+# Manage stablecoin deployment through Crypto Infrastructure as Code
+################################################################
+
+addon "svm" {
+    rpc_api_url = input.rpc_api_url
+    network_id = input.network_id
+}
+
+action "deploy_collateral_stablecoin" "svm::deploy_program" {
+    description = "Deploy collateral_stablecoin program"
+    program = svm::get_program_from_anchor_project("collateral_stablecoin") 
+    authority = signer.authority
+    payer = signer.payer
+}
