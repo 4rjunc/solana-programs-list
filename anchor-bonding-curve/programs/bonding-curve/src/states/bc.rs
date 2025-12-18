@@ -14,3 +14,8 @@ pub struct BondingCurve {
     pub is_migrated: bool,
     pub reserved: [u8; 8],
 }
+
+impl<'info> BondingCurve {
+    pub const SEED_PREFIX: &'static str = "bonding_curve";
+    pub const LEN: usize = 8 * 5 + 1 + 1 + 8;
+}
