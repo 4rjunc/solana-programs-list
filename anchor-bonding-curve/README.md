@@ -1,4 +1,0 @@
-# Bonding Curve 
-
-simple 
-
