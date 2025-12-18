@@ -18,4 +18,12 @@ pub struct BondingCurve {
 impl<'info> BondingCurve {
     pub const SEED_PREFIX: &'static str = "bonding_curve";
     pub const LEN: usize = 8 * 5 + 1 + 1 + 8;
+
+    pub fn get_signer<'a>(mint: &'a Pubkey, bump: &'a u8) -> [&'a [u8]; 3] {
+        [
+            Self::SEED_PREFIX.as_bytes(),
+            mint.as_ref(),
+            std::slice::from_ref(bump),
+        ]
+    }
 }
