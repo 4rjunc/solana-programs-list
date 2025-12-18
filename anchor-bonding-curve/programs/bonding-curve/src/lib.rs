@@ -23,6 +23,10 @@ pub mod bonding_curve {
         msg!("Config");
         ctx.accounts.process(new_config)
     }
+
+    pub fn launch(ctx: Context<Launch>, name: String, symbol: String, uri: String) -> Result<()> {
+        msg!("Launch");
+    }
 }
 
 #[derive(Accounts)]
