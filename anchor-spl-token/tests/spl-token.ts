@@ -22,6 +22,11 @@ describe("spl-token", () => {
   });
 
   it("Create Mint Account", async () => {
+
+    console.log("============================================================")
+    console.log("Create Mint Account")
+    console.log("============================================================")
+
     const tx = await program.methods.createMint()
       .accounts({
         mint: mint.publicKey,
@@ -41,6 +46,10 @@ describe("spl-token", () => {
   });
 
   it("Create Mint Account With PDA", async () => {
+
+    console.log("============================================================")
+    console.log("Create Mint Account With PDA")
+    console.log("============================================================")
 
     const [pda_mint, _] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("mint1")],
