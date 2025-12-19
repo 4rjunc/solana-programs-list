@@ -18,3 +18,23 @@ pub struct CreateMint<'info> {
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
+
+#[derive(Accounts)]
+pub struct CreateMintPDA<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+
+    #[account(
+        init,
+        payer = signer,
+        mint::decimals = 6,
+        mint::authority = signer.key(),
+        mint::freeze_authority = signer.key(),
+        seeds = [b"mint"],
+        bump
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub system_program: Program<'info, System>,
+}

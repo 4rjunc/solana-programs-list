@@ -4,7 +4,7 @@ pub mod instructions;
 
 use instructions::*;
 
-declare_id!("96KJa3QnFirfkBGYqfkpirVbaMWAFYyhPVpq2a1dHmwz");
+declare_id!("44jtHxHi3uJ9w2KWtF1L2Ai1BVTGFksbyw9fWTEGLZ1Y");
 
 #[program]
 pub mod spl_token {
@@ -17,6 +17,11 @@ pub mod spl_token {
     }
 
     pub fn create_mint(ctx: Context<CreateMint>) -> Result<()> {
+        msg!("creating a mint account: {}", ctx.accounts.mint.key());
+        Ok(())
+    }
+
+    pub fn create_mint_pda(ctx: Context<CreateMintPDA>) -> Result<()> {
         msg!("creating a mint account: {}", ctx.accounts.mint.key());
         Ok(())
     }
