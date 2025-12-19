@@ -30,7 +30,7 @@ pub struct CreateMintPDA<'info> {
         mint::decimals = 6,
         mint::authority = signer.key(),
         mint::freeze_authority = signer.key(),
-        seeds = [b"mint1"],
+        seeds = [b"mint5"],
         bump
     )]
     pub mint: InterfaceAccount<'info, Mint>,

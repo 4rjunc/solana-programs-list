@@ -33,6 +33,14 @@ pub mod spl_token {
         );
         Ok(())
     }
+
+    pub fn create_pda_token_account(ctx: Context<CreatePDATokenAccount>) -> Result<()> {
+        msg!(
+            "creating a pda token account: {}",
+            ctx.accounts.token_account.key()
+        );
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]

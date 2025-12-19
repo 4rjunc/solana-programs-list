@@ -52,7 +52,7 @@ describe("spl-token", () => {
     console.log("============================================================")
 
     const [pda_mint, _] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("mint1")],
+      [Buffer.from("mint5")],
       program.programId,
     );
 
@@ -60,7 +60,7 @@ describe("spl-token", () => {
       .accounts({
         tokenProgram: TOKEN_2022_PROGRAM_ID
       })
-      .rpc();
+      .rpc({ commitment: "confirmed" });
     console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
 
     const mintAccount = await getMint(
@@ -83,7 +83,7 @@ describe("spl-token", () => {
         mint: mint.publicKey,
         tokenProgram: TOKEN_2022_PROGRAM_ID
       })
-      .rpc();
+      .rpc({ commitment: "confirmed" });
     console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
 
     const associatedTokenAccountAddress = await getAssociatedTokenAddress(
@@ -103,6 +103,33 @@ describe("spl-token", () => {
     console.log("\nAssociated Token Account", tokenAccount);
   });
 
+  it("Create PDA Token Account ", async () => {
 
+    console.log("============================================================")
+    console.log("Creating PDA Token Account")
+    console.log("============================================================")
+
+    const [token, tokenBump] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("token")],
+      program.programId,
+    );
+
+    const tx = await program.methods.createPdaTokenAccount()
+      .accounts({
+        mint: pda_mint,
+        tokenProgram: TOKEN_2022_PROGRAM_ID
+      })
+      .rpc({ commitment: "confirmed" });
+    console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
+
+    const tokenAccount = await getAccount(
+      program.provider.connection,
+      token,
+      "confirmed",
+      TOKEN_2022_PROGRAM_ID,
+    );
+
+    console.log("\nPDA Token Account", tokenAccount);
+  });
 
 });
