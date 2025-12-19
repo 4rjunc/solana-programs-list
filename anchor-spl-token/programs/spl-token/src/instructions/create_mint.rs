@@ -7,7 +7,7 @@ pub struct CreateMint<'info> {
     pub signer: Signer<'info>,
 
     #[account(
-        init,
+        init, // → Generates system_program::create_account
         payer = signer,
         mint::decimals = 6,
         mint::authority = signer.key(),
@@ -25,12 +25,12 @@ pub struct CreateMintPDA<'info> {
     pub signer: Signer<'info>,
 
     #[account(
-        init,
+        init, // → Generates system_program::create_account
         payer = signer,
         mint::decimals = 6,
         mint::authority = signer.key(),
         mint::freeze_authority = signer.key(),
-        seeds = [b"mint"],
+        seeds = [b"mint1"],
         bump
     )]
     pub mint: InterfaceAccount<'info, Mint>,

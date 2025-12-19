@@ -25,6 +25,14 @@ pub mod spl_token {
         msg!("creating a mint account: {}", ctx.accounts.mint.key());
         Ok(())
     }
+
+    pub fn create_ata(ctx: Context<CreateAssociatedTokenAccount>) -> Result<()> {
+        msg!(
+            "creating a associated token account: {}",
+            ctx.accounts.token_account.key()
+        );
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
