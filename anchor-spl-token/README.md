@@ -122,26 +122,21 @@ let cpi_ctx = anchor_lang::context::CpiContext::new(
 
 ```
 
-References 
-
-- [1](https://www.solana-program.com/docs/token)
-- [2](https://www.anchor-lang.com/docs/tokens)
-- [3](https://solana.com/docs/programs/examples#tokens)
-
 ## Token Account 
 
-Token account is more like a wallet for a specific token (mint account) of a indivdual. This is an account type that stores information about an indivdual's ownership of a specific token (mint). 
+A token account is like a wallet for a specific token (mint) owned by an individual. It stores information about ownership of units of a specific token type.
 
+### Account Structure
 ```rust
-/// Account data.
+/// Token Account data structure
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Account {
     /// The mint associated with this account
     pub mint: Pubkey,
-    /// The owner of this account.
+    /// The owner (authority) of this account
     pub owner: Pubkey,
-    /// The amount of tokens this account holds.
+    /// The amount of tokens this account holds
     pub amount: u64,
     /// If `delegate` is `Some` then `delegated_amount` represents
     /// the amount authorized by the delegate
@@ -155,33 +150,60 @@ pub struct Account {
     pub is_native: COption<u64>,
     /// The amount delegated
     pub delegated_amount: u64,
-    /// Optional authority to close the account.
+    /// Optional authority to close the account
     pub close_authority: COption<Pubkey>,
 }
-
 ```
 
-owner can transfer, burn, or delegate tokens from the account
+**Ownership Concepts:**
+
+- **System-level ownership**: Token accounts are always owned by the Token Program (or Token-2022 Program) at the system level. This determines which program can modify the account data.
+- **Token-level authority**: The `owner` field specifies who has authority to transfer, burn, or delegate tokens from this account. This is sometimes called the "authority" to distinguish it from the program owner.
 
 ### Associated Token Account (ATA)
 
-ATA is same as token accounts with an address that is PDA derived from and created by the Associated Token Program. Its more like a default token account for a user to hold tokens. Because of ATA we can determistically find a user's token account for any given mint. When creating an associated token account, the Associated Token Program makes a CPI (Cross-Program Invocation) to either the Token Program or Token Extension Program. The created account is owned by the token program and has the same Account type structure as defined in the token program
+An Associated Token Account (ATA) is a token account whose address is a **Program Derived Address (PDA)** created using a standardized derivation formula by the Associated Token Program. ATAs serve as the default token account for a user to hold a specific token.
 
+**Key characteristics:**
+- Deterministic address based on owner and mint
+- Same `Account` data structure as regular token accounts
+- Owned by Token Program (not Associated Token Program) at system level
+- Enables easy discovery of any user's token account for any mint
+
+### ATA Address Derivation
 ```rust
 pub fn get_associated_token_address_and_bump_seed_internal(
-    wallet_address: &Pubkey,
-    token_mint_address: &Pubkey,
-    program_id: &Pubkey,
-    token_program_id: &Pubkey,
+    wallet_address: &Pubkey,        // The authority who will own the tokens
+    token_mint_address: &Pubkey,    // The token mint
+    program_id: &Pubkey,            // Associated Token Program ID
+    token_program_id: &Pubkey,      // Token Program or Token-2022
 ) -> (Pubkey, u8) {
     Pubkey::find_program_address(
         &[
-            &wallet_address.to_bytes(), // Owner's public key
-            &token_program_id.to_bytes(), // Token Program or Token Extension Program
-            &token_mint_address.to_bytes(), // Token mint address
+            &wallet_address.to_bytes(),      // Owner's public key
+            &token_program_id.to_bytes(),    // Token Program or Token Extension Program
+            &token_mint_address.to_bytes(),  // Token mint address
         ],
-        program_id, // Associated Token Program ID
+        program_id,  // Associated Token Program ID
     )
 }
 ```
+
+**Creation Process:**
+
+When creating an ATA, the Associated Token Program:
+1. Derives the PDA address using the formula above
+2. Makes a CPI to the System Program to create the account
+3. Makes a CPI to the Token Program to initialize the account
+4. Sets the Token Program as the system-level owner
+5. Sets the wallet address as the token-level authority (`Account.owner`)
+
+The resulting ATA is a PDA with a deterministic address, but owned by the Token Program, allowing it to process token operations like transfers, burns, and delegations.
+
+References 
+
+- [1](https://www.solana-program.com/docs/token)
+- [2](https://www.anchor-lang.com/docs/tokens)
+- [3](https://solana.com/docs/programs/examples#tokens)
+
 
