@@ -198,7 +198,58 @@ When creating an ATA, the Associated Token Program:
 4. Sets the Token Program as the system-level owner
 5. Sets the wallet address as the token-level authority (`Account.owner`)
 
-The resulting ATA is a PDA with a deterministic address, but owned by the Token Program, allowing it to process token operations like transfers, burns, and delegations.
+The resulting ATA is a PDA with a deterministic address, but owned by the Token Program, allowing it to process token operations like transfers, burns, and delegations. More on ATA and PDA: [1](https://www.youtube.com/watch?v=d9YoonqoBaw), [2](https://www.helius.dev/blog/solana-pda)
+
+## Token Mint
+
+We will do CPI to the Token Program to mint new tokens. This is done by invoking `mint_to` instruction on token program. Only the address specified as mint authority can mint new tokens
+
+Accounts context:
+
+```rust
+#[derive(Accounts)]
+pub struct MintTokens<'info> {
+    // The mint authority
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    // The mint account
+    #[account(mut)]
+    pub mint: InterfaceAccount<'info, Mint>,
+    // The destination token account
+    #[account(mut)]
+    pub token_account: InterfaceAccount<'info, TokenAccount>,
+    // The token program
+    pub token_program: Interface<'info, TokenInterface>,
+}
+```
+
+Intruction:
+
+```rust
+    pub fn mint_tokens(ctx: Context<MintTokens>, amount: u64) -> Result<()> {
+        let cpi_accounts = MintTo {
+            mint: ctx.accounts.mint.to_account_info(),
+            to: ctx.accounts.token_account.to_account_info(),
+            authority: ctx.accounts.signer.to_account_info(),
+        };
+        let cpi_program_id = ctx.accounts.token_program.key();
+        let cpi_context = CpiContext::new(cpi_program_id, cpi_accounts);
+        token_interface::mint_to(cpi_context, amount)?;
+        Ok(())
+    }
+```
+
+the `token_interface::mint_to` function make a CPI to either the Token Program or Token Extension Program. This function requires:
+
+The `MintTo` struct which specifies the required accounts:
+
+`mint` - The mint account to create new units of tokens for
+`to` - The destination token account to receive the minted tokens
+`authority` - The mint authority with permission to mint tokens
+
+The amount of tokens to mint, in base units of the token adjusted by decimals. (e.g. if the mint has 6 decimals, amount of 1000000 = 1 token)
+
+The mint authority passed to the `mint_to` instruction must match the `mint_authority` stored on the mint account.
 
 References 
 
