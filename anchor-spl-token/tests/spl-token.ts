@@ -18,7 +18,7 @@ describe("spl-token", () => {
   it("Is initialized!", async () => {
     // Add your test here.
     const tx = await program.methods.initialize().rpc();
-    console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
+    console.log(`Your transaction signature: https://solscan.io/tx/${tx}?cluster=devnet`);
   });
 
   it("Create Mint Account", async () => {
@@ -34,7 +34,7 @@ describe("spl-token", () => {
       })
       .signers([mint])
       .rpc();
-    console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
+    console.log(`Your transaction signature: https://solscan.io/tx/${tx}?cluster=devnet`);
 
     const mintAccount = await getMint(
       program.provider.connection,
@@ -61,7 +61,7 @@ describe("spl-token", () => {
         tokenProgram: TOKEN_2022_PROGRAM_ID
       })
       .rpc({ commitment: "confirmed" });
-    console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
+    console.log(`Your transaction signature: https://solscan.io/tx/${tx}?cluster=devnet`);
 
     const mintAccount = await getMint(
       program.provider.connection,
@@ -84,7 +84,7 @@ describe("spl-token", () => {
         tokenProgram: TOKEN_2022_PROGRAM_ID
       })
       .rpc({ commitment: "confirmed" });
-    console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
+    console.log(`Your transaction signature: https://solscan.io/tx/${tx}?cluster=devnet`);
 
     const associatedTokenAccountAddress = await getAssociatedTokenAddress(
       mint.publicKey,
@@ -120,7 +120,7 @@ describe("spl-token", () => {
         tokenProgram: TOKEN_2022_PROGRAM_ID
       })
       .rpc({ commitment: "confirmed" });
-    console.log(`Your transaction signature: https://orbmarkets.io/tx/${tx}?cluster=devnet`);
+    console.log(`Your transaction signature: https://solscan.io/tx/${tx}?cluster=devnet`);
 
     const tokenAccount = await getAccount(
       program.provider.connection,
