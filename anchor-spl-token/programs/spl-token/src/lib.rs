@@ -60,6 +60,27 @@ pub mod spl_token {
         token_interface::mint_to(cpi_context, amount)?;
         Ok(())
     }
+
+    // Mint Tokens with PDA mint authority via CPI
+    pub fn mint_token_pda(ctx: Context<MintTokensPDA>, amount: u64) -> Result<()> {
+        let signer_seeds: &[&[&[u8]]] = &[&[b"mint7", &[ctx.bumps.mint]]];
+        // Create the MintTo struct with the accounts required for the CPI
+        let cpi_accounts = MintTo {
+            mint: ctx.accounts.mint.to_account_info(),
+            to: ctx.accounts.token_account.to_account_info(),
+            authority: ctx.accounts.mint.to_account_info(),
+        };
+
+        // The program being invoked in the CPI
+        let cpi_program_id = ctx.accounts.token_program.to_account_info();
+
+        // Combine the accounts and program into a "CpiContext"
+        let cpi_context = CpiContext::new(cpi_program_id, cpi_accounts).with_signer(signer_seeds);
+
+        // Make CPI to mint_to instruction on the token program
+        token_interface::mint_to(cpi_context, amount)?;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]

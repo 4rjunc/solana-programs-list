@@ -223,7 +223,7 @@ pub struct MintTokens<'info> {
 }
 ```
 
-Intruction:
+Instruction:
 
 ```rust
     pub fn mint_tokens(ctx: Context<MintTokens>, amount: u64) -> Result<()> {
@@ -250,6 +250,68 @@ The `MintTo` struct which specifies the required accounts:
 The amount of tokens to mint, in base units of the token adjusted by decimals. (e.g. if the mint has 6 decimals, amount of 1000000 = 1 token)
 
 The mint authority passed to the `mint_to` instruction must match the `mint_authority` stored on the mint account.
+
+### Mint Tokens with PDA mint authority 
+
+Accounts context (this initialize mint account and token account)
+
+```rust
+#[derive(Accounts)]
+pub struct MintTokensPDA<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+
+    #[account(
+        init_if_needed,
+        payer = signer,
+        mint::decimals = 6,
+        mint::authority = mint,
+        mint::freeze_authority = mint,
+        seeds = [b"mint7"],
+        bump
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    #[account(
+        init_if_needed,
+        payer = signer,
+        associated_token::mint = mint,
+        associated_token::authority = signer,
+        associated_token::token_program = token_program,
+    )]
+    pub token_account: InterfaceAccount<'info, TokenAccount>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+Instruction:
+
+```rust 
+pub fn mint_token_pda(ctx: Context<MintTokensPDA>, amount: u64) -> Result<()> {
+        let signer_seeds: &[&[&[u8]]] = &[&[b"mint7", &[ctx.bumps.mint]]];
+        // Create the MintTo struct with the accounts required for the CPI
+        let cpi_accounts = MintTo {
+            mint: ctx.accounts.mint.to_account_info(),
+            to: ctx.accounts.token_account.to_account_info(),
+            authority: ctx.accounts.mint.to_account_info(),
+        };
+
+        // The program being invoked in the CPI
+        let cpi_program_id = ctx.accounts.token_program.to_account_info();
+
+        // Combine the accounts and program into a "CpiContext"
+        let cpi_context = CpiContext::new(cpi_program_id, cpi_accounts).with_signer(signer_seeds);
+
+        // Make CPI to mint_to instruction on the token program
+        token_interface::mint_to(cpi_context, amount)?;
+        Ok(())
+    }
+
+```
+
 
 References 
 
