@@ -312,6 +312,9 @@ pub fn mint_token_pda(ctx: Context<MintTokensPDA>, amount: u64) -> Result<()> {
 
 ```
 
+## Token Transfer
+
+Moving token from one token account to another token account of same mint. Done my invoking `transfer-checked` instruction in token program. Only the pubkey in owner (authority) of the source account can transfer tokens out of the account. 
 
 References 
 
