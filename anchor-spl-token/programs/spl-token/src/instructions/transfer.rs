@@ -16,10 +16,10 @@ pub struct TransferToken<'info> {
     pub sender_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
-        init_if_needed,
+        init_if_needed, // account can also be initialzed offchain
         payer = signer,
         associated_token::mint = mint,
-        associated_token::authority = signer,
+        associated_token::authority = signer, // should be the reciever's address
         associated_token::token_program = token_program,
     )]
     pub recipient_token_account: InterfaceAccount<'info, TokenAccount>,
