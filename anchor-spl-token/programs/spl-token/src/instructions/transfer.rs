@@ -30,7 +30,7 @@ pub struct TransferToken<'info> {
 }
 
 #[derive(Accounts)]
-pub struct TransferTokens<'info> {
+pub struct TransferTokensPDA<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
