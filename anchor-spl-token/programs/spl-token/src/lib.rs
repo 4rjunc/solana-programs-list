@@ -106,6 +106,25 @@ pub mod spl_token {
 
         Ok(())
     }
+
+    pub fn transfer_tokens_pda(ctx: Context<TransferTokensPDA>) -> Result<()> {
+        let signer_seeds: &[&[&[u8]]] = &[&[b"token", &[ctx.bumps.sender_token_account]]];
+
+        let amount = ctx.accounts.sender_token_account.amount;
+        let decimals = ctx.accounts.mint.decimals;
+
+        let cpi_accounts = TransferChecked {
+            mint: ctx.accounts.mint.to_account_info(),
+            from: ctx.accounts.sender_token_account.to_account_info(),
+            to: ctx.accounts.recipient_token_account.to_account_info(),
+            authority: ctx.accounts.sender_token_account.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts).with_signer(signer_seeds);
+        token_interface::transfer_checked(cpi_context, amount, decimals)?;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
