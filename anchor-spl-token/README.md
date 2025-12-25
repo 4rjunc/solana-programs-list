@@ -314,7 +314,57 @@ pub fn mint_token_pda(ctx: Context<MintTokensPDA>, amount: u64) -> Result<()> {
 
 ## Token Transfer
 
-Moving token from one token account to another token account of same mint. Done my invoking `transfer-checked` instruction in token program. Only the pubkey in owner (authority) of the source account can transfer tokens out of the account. 
+Moving token from one token account to another token account of same mint. Done by invoking `transfer-checked` instruction in token program. Only the pubkey in owner (authority) of the source account can transfer tokens out of the account. 
+
+`TransferChecked` struct which specifies the required accounts:
+
+`mint` - The mint account specifying the type of token to transfer
+`from` - The source token account to transfer tokens from
+`to` - The destination token account to receive the transferred tokens
+`authority` - The owner of the source token account
+
+Account Context (at minimum these accounts are required):
+
+```rust
+#[derive(Accounts)]
+pub struct TransferTokens<'info> {
+    // The source token account owner
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    // The mint account specifying the type of token
+    #[account(mut)]
+    pub mint: InterfaceAccount<'info, Mint>,
+    // The source token account to transfer tokens from
+    #[account(mut)]
+    pub sender_token_account: InterfaceAccount<'info, TokenAccount>,
+    // The destination token account to receive tokens
+    #[account(mut)]
+    pub recipient_token_account: InterfaceAccount<'info, TokenAccount>,
+    // The token program that will process the transfer
+    pub token_program: Interface<'info, TokenInterface>,
+}
+```
+
+Instruction
+
+```rust
+    pub fn transfer_tokens(ctx: Context<TransferToken>, amount: u64) -> Result<()> {
+        let decimals = ctx.accounts.mint.decimals;
+
+        let cpi_accounts = TransferChecked {
+            mint: ctx.accounts.mint.to_account_info(),
+            from: ctx.accounts.sender_token_account.to_account_info(),
+            to: ctx.accounts.recipient_token_account.to_account_info(),
+            authority: ctx.accounts.signer.to_account_info(),
+        };
+
+        let cpi_program_id = ctx.accounts.token_program.to_account_info();
+        let cpi_context = CpiContext::new(cpi_program_id, cpi_accounts);
+        token_interface::transfer_checked(cpi_context, amount, decimals);
+
+        Ok(())
+    }
+```
 
 References 
 

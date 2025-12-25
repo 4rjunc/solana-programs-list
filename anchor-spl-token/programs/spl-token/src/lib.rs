@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{self, MintTo};
+use anchor_spl::token_interface::{self, MintTo, TokenAccount, TokenInterface, TransferChecked};
 pub mod instructions;
 
 use instructions::*;
@@ -79,6 +79,31 @@ pub mod spl_token {
 
         // Make CPI to mint_to instruction on the token program
         token_interface::mint_to(cpi_context, amount)?;
+        Ok(())
+    }
+
+    // transfer tokens
+    pub fn transfer_tokens(ctx: Context<TransferToken>, amount: u64) -> Result<()> {
+        // get decimal of the token
+        let decimals = ctx.accounts.mint.decimals;
+
+        // create TransferChecked struct with required account
+        let cpi_accounts = TransferChecked {
+            mint: ctx.accounts.mint.to_account_info(),
+            from: ctx.accounts.sender_token_account.to_account_info(),
+            to: ctx.accounts.recipient_token_account.to_account_info(),
+            authority: ctx.accounts.signer.to_account_info(),
+        };
+
+        // program to be invoked by CPI
+        let cpi_program_id = ctx.accounts.token_program.to_account_info();
+
+        // creating a cpi context with accounts and program id
+        let cpi_context = CpiContext::new(cpi_program_id, cpi_accounts);
+
+        // CPI-ing
+        token_interface::transfer_checked(cpi_context, amount, decimals);
+
         Ok(())
     }
 }
