@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{self, MintTo, TokenAccount, TokenInterface, TransferChecked};
+use anchor_spl::token_interface::{self, MintTo, TransferChecked};
 pub mod instructions;
 
 use instructions::*;
